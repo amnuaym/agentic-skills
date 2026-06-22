@@ -47,11 +47,17 @@ To keep the project organized, always follow this standard folder structure for 
 
 ## How to Assess Current Phase
 
+Assess gates in order from Phase 0 to Phase 4. The **current phase** is the earliest (lowest-numbered) phase with one or more unmet gate criteria.
+
 1. **Check for business requirements & backlog** — If missing or no user stories in `/docs/discovery` → Phase 0
 2. **Check for architecture & migration plans** — If requirements exist but no architecture/cost decisions in `/docs/architecture` → Phase 1
 3. **Check for working code & dry-runs** — If architecture exists but coverage/quality/migration-tests have gaps in `/src` and `/tests` → Phase 2
 4. **Check for deployment & business readiness** — If code is solid but security/infra/cutover plans are missing in `/docs/runbooks` or `/infra` → Phase 3
 5. **Check for post-launch metrics** — If system is live but KPIs aren't measured in `/docs/reviews` or helpdesk hasn't taken over → Phase 4
+
+If multiple gates have gaps, report all gaps, but keep the active phase set to the earliest incomplete gate.
+
+When onboarding a project already in flight (artifacts across multiple phases), first produce a gate status table (met/missing by gate), then set the active phase using the same earliest-incomplete rule.
 
 ## Gate Criteria
 
@@ -66,8 +72,8 @@ All of the following must be satisfied before starting architecture design:
 * [ ] MVP scope agreed and documented (saved in `/docs/discovery`)
 * [ ] Non-functional requirements captured (performance, security, compliance, scalability) (saved in `/docs/discovery`)
 * [ ] Initial compliance triggers identified (e.g., DPIA needed for PII) (saved in `/docs/discovery`)
-* [ ] Iteration cadence decided (sprint length, ceremonies)
-* [ ] Definition of Done and Definition of Ready agreed by team
+* [ ] Iteration cadence decided (sprint length, ceremonies) (saved in `/docs/discovery`)
+* [ ] Definition of Done and Definition of Ready agreed by team (saved in `/docs/discovery`)
 
 ### Gate 1: Planning → Development
 
@@ -86,12 +92,12 @@ All of the following must be satisfied before starting development:
 
 All of the following must be satisfied before deploying to production environments:
 
-* [ ] Unit test coverage meets threshold (90% overall, 100% domain logic) (code in `/tests`)
+* [ ] Unit test coverage meets threshold (90% overall; 100% for business-rule code under `/src/domain` and `/src/services/business-rules`) (evidence in `/tests`)
 * [ ] Integration and E2E tests pass with real dependencies (code in `/tests`)
-* [ ] Performance/load test baseline established
+* [ ] Performance/load test baseline established (test assets/results in `/tests`)
 * [ ] Documentation is current and cross-references are accurate across `/docs`
 * [ ] Database migrations are versioned, idempotent, and rollback-safe (scripts saved in `/scripts`)
-* [ ] No critical or high security findings open in the app code (`/src`)
+* [ ] No CVSS >= 7.0 findings open in static analysis of app code (`/src`), using the scanner defined for this project in `/docs/architecture`
 * [ ] **FinOps**: Infrastructure resource tagging applied via IaC (code updated in `/infra`)
 * [ ] **Data**: Legacy data migration dry-runs completed in Staging with acceptable error rates (scripts run from `/scripts`)
 
@@ -113,7 +119,7 @@ All of the following must be satisfied before flipping the switch to live users:
 
 All of the following must be satisfied to close the project:
 
-* [ ] Hypercare period elapsed with stable system performance (no Sev 1/2 incidents)
+* [ ] Hypercare period of 4 weeks elapsed with stable system performance (no Sev 1/2 incidents during that period)
 * [ ] Post-Implementation Review (PIR) completed (saved in `/docs/reviews`)
 * [ ] **Value**: Product KPIs measured against Phase 0 baselines (tracked in `/docs/reviews`)
 * [ ] Final handover to operations and maintenance teams completed
@@ -122,17 +128,24 @@ All of the following must be satisfied to close the project:
 
 As the Delivery Lead AI Agent, follow these rules when managing tasks and files:
 
-1. **Assess the Structure:** When starting, check if the project follows the exact folder structure above. If it does not, politely suggest setting it up to the user.
-2. **Place Files Correctly:** Whenever you create or update a document, code, or script, save it in the correct folder based on its phase as strictly defined in the Gate Criteria. Do not create files outside this folder structure.
-3. **Enforce Organization:** If you notice files mixed up (for example, the product backlog sitting in the root folder instead of `/docs/discovery`), ask the user if you should help move and organize them.
-4. **Phase-Based Navigation:** When verifying if a phase is complete, search ONLY in the specific folder linked to that phase's gate criteria. 
+1. **Assess the Structure:** When starting, check if the project follows the exact folder structure above.
+  If missing or incomplete, list missing folders and ask: "Would you like me to create the missing folders now before we proceed?"
+  If the structure is completely absent, offer to scaffold it with placeholder `README.md` files in each required folder.
+2. **Place Files Correctly:** Save deliverables in the folder mapped by each gate criterion.
+  If a criterion has no mapped folder, ask the user for evidence and then record the decision in the phase folder (`/docs/discovery`, `/docs/architecture`, `/docs/runbooks`, or `/docs/reviews`) as appropriate.
+3. **Enforce Organization:** If you find files in the wrong location, ask the user whether to move and normalize them before gate evaluation.
+4. **Resolve Conflicts in Evidence:** If multiple conflicting files exist for one criterion, list the conflicting files, summarize differences, ask which is canonical, and do not mark the criterion complete until confirmed.
+5. **Gate Enforcement Behavior:** Verify each criterion with file evidence or explicit user confirmation. Render unmet items as `[ ]` and verified items as `[x]`. Do not advance to the next phase until all items in the current gate are verified.
+6. **Gate Override Policy:** If a user asks to skip/override a criterion, state the risk, ask for explicit written confirmation, and record an override note in the relevant phase folder. Continue only after confirmation and keep the override flagged in later summaries.
 
 ## Phase Details
 
 Each phase has its own detailed guide:
 
-* **Phase 0**: See `discovery.md` — Business requirements, backlog, iteration planning
-* **Phase 1**: See `planning.md` — Architecture, API design, messaging, FinOps estimates, Data strategy
-* **Phase 2**: See `development.md` — Service components, testing pyramid, migration dry-runs, IaC tagging
-* **Phase 3**: See `deployment.md` — DevSecOps, CI/CD, production hardening, cutover, compliance
-* **Phase 4**: See `hypercare.md` — Value realization, support transition, post-implementation review
+* **Phase 0**: See `0discovery.md` — Business requirements, backlog, iteration planning
+* **Phase 1**: See `1planning.md` — Architecture, API design, messaging, FinOps estimates, Data strategy
+* **Phase 2**: See `2development.md` — Service components, testing pyramid, migration dry-runs, IaC tagging
+* **Phase 3**: See `3deployment.md` — DevSecOps, CI/CD, production hardening, cutover, compliance
+* **Phase 4**: See `4hypercare.md` — Value realization, support transition, post-implementation review
+
+If a phase detail file is missing, continue using this SKILL.md gate criteria as the source of truth and tell the user which detail file was not found.
