@@ -8,11 +8,11 @@ This repository is the home for reusable agentic skills that can be shared publi
 
 ## Repository layout
 
-- `skills/` - related skills stored in their own folders
+- Each skill lives in its own top-level directory (e.g. `delivery-lead/`, `test-lead/`), containing a `SKILL.md` and any supporting reference files.
 
 ## Using this repository
 
-- Browse the `skills/` directory for publicly available skills
+- Browse the top-level directories for publicly available skills
 - Open an issue or pull request if you want to suggest an addition or improvement
 - Expect final curation and merge decisions to be handled by the repository maintainer
 

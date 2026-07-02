@@ -74,6 +74,7 @@ All of the following must be satisfied before starting architecture design:
 * [ ] Initial compliance triggers identified (e.g., DPIA needed for PII) (saved in `/docs/discovery`)
 * [ ] Iteration cadence decided (sprint length, ceremonies) (saved in `/docs/discovery`)
 * [ ] Definition of Done and Definition of Ready agreed by team (saved in `/docs/discovery`)
+* [ ] First sprint backlog ready (saved in `/docs/discovery`)
 
 ### Gate 1: Planning → Development
 
@@ -82,9 +83,12 @@ All of the following must be satisfied before starting development:
 * [ ] Bounded contexts and service boundaries documented (saved in `/docs/architecture`)
 * [ ] FE-BE-DB layering decided and diagrammed (saved in `/docs/architecture`)
 * [ ] API strategy chosen (REST, GraphQL, or hybrid) with contracts defined (saved in `/docs/architecture`)
+* [ ] Communication patterns decided (sync vs. async) mapped per major feature (saved in `/docs/architecture`)
 * [ ] Environment strategy defined (Dev, UAT, Staging, Prod) (saved in `/docs/architecture`)
 * [ ] Infrastructure as Code approach selected (tools configured in `/infra`)
 * [ ] ADRs (Architecture Decision Records) written for all significant architectural decisions (saved in `/docs/architecture`)
+* [ ] **SRE**: Reliability goals (SLOs) and measurements (SLIs) defined for critical user journeys; tracing and logging strategy agreed (saved in `/docs/architecture`)
+* [ ] **Security**: SAST/dependency scanning tool selected and CVSS action threshold agreed (saved in `/docs/architecture`) — this is what Gate 2's security check verifies against
 * [ ] **FinOps**: Cloud cost estimates documented and budget approved (saved in `/docs/architecture`)
 * [ ] **Data**: Legacy data migration strategy defined, if replacing an old system (saved in `/docs/architecture`)
 
@@ -92,12 +96,15 @@ All of the following must be satisfied before starting development:
 
 All of the following must be satisfied before deploying to production environments:
 
+* [ ] All services containerized and configured for health checks (liveness/readiness) and graceful shutdown (evidence in `/src`)
 * [ ] Unit test coverage meets threshold (90% overall; 100% for business-rule code under `/src/domain` and `/src/services/business-rules`) (evidence in `/tests`)
+* [ ] Property-based tests cover critical invariants where applicable (e.g., values that must never go negative) (evidence in `/tests`)
 * [ ] Integration and E2E tests pass with real dependencies (code in `/tests`)
 * [ ] Performance/load test baseline established (test assets/results in `/tests`)
 * [ ] Documentation is current and cross-references are accurate across `/docs`
 * [ ] Database migrations are versioned, idempotent, and rollback-safe (scripts saved in `/scripts`)
-* [ ] No CVSS >= 7.0 findings open in static analysis of app code (`/src`), using the scanner defined for this project in `/docs/architecture`
+* [ ] No CVSS >= 7.0 findings open in static analysis of app code (`/src`), using the scanner and threshold agreed in Phase 1 (`/docs/architecture`)
+* [ ] **SRE**: Logs are structured (JSON) with Trace IDs tracked across services; SLI/SLO measurement and alert rules are saved as code (evidence in `/src`, `/infra`)
 * [ ] **FinOps**: Infrastructure resource tagging applied via IaC (code updated in `/infra`)
 * [ ] **Data**: Legacy data migration dry-runs completed in Staging with acceptable error rates (scripts run from `/scripts`)
 
@@ -108,7 +115,10 @@ All of the following must be satisfied before flipping the switch to live users:
 * [ ] OWASP Top 10 audit passed and security headers enforced
 * [ ] Secrets rotated and rotation procedure documented
 * [ ] CI/CD pipeline complete (Lint → Test → Integration → E2E → Deploy) (pipeline config saved in `/infra`)
-* [ ] Production hardening checklist completed
+* [ ] Branch protection and deployment approvals enabled for Prod (config in `/infra`)
+* [ ] Container images scanned and minimal base images used
+* [ ] Incident response runbooks written (saved in `/docs/runbooks`)
+* [ ] Production hardening checklist completed (see `3deployment.md`)
 * [ ] **FinOps**: Cloud billing alerts and budget thresholds configured
 * [ ] **Compliance**: Formal Legal/InfoSec sign-off secured (e.g., DPIA approved)
 * [ ] **Change Mgmt**: End-user training completed and comms sent
@@ -119,9 +129,11 @@ All of the following must be satisfied before flipping the switch to live users:
 
 All of the following must be satisfied to close the project:
 
-* [ ] Hypercare period of 4 weeks elapsed with stable system performance (no Sev 1/2 incidents during that period)
+* [ ] Hypercare exits on stability, not on a fixed date: zero open Sev 1/2 incidents, support ticket volume normalized to BAU levels, and system performance meets the NFRs from Phase 0 — typically reached within 2-4 weeks post-launch, but the date alone does not satisfy this criterion
+* [ ] Zero critical/high defects remaining from launch
 * [ ] Post-Implementation Review (PIR) completed (saved in `/docs/reviews`)
 * [ ] **Value**: Product KPIs measured against Phase 0 baselines (tracked in `/docs/reviews`)
+* [ ] Temporary elevated access (granted for cutover/hypercare) revoked
 * [ ] Final handover to operations and maintenance teams completed
 
 ## Agent Workflow & Rules

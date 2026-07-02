@@ -30,6 +30,26 @@ Software cannot go live if legal/compliance risks are unresolved.
 
 * Require PR approvals for production branches.
 
+* **Branch protection**: production branches require review approval and passing CI before merge; deploys to Prod require an explicit approval step, not just a green pipeline.
+
+### Production Hardening Checklist
+
+A catch-all pass for the things that don't fit neatly into the sections above but still get exploited if missed:
+
+* No debug mode, verbose stack traces, or default/test accounts reachable in production.
+* Admin/internal endpoints are not publicly exposed (network-restricted or behind auth).
+* Service accounts and IAM roles follow least privilege — no service running with broader permissions than it needs.
+* Unused ports and services are closed.
+* Resource limits/quotas are set so one runaway process can't take down the host or cluster.
+* Dependency versions are pinned (no floating `latest`/`*` in production manifests).
+
+### Incident Response Runbooks
+
+Write these before go-live, not during the first incident:
+
+* One runbook per critical failure mode (e.g., "database unreachable," "checkout failing," "auth provider down") with detection signal, first response steps, and escalation path.
+* Keep runbooks next to the code they cover and reference them from the on-call/alerting tooling so responders find them without searching.
+
 ## FinOps Operations
 
 * **Billing Alerts**: Configure cloud budget alerts (e.g., alert at 50%, 80%, 100% of monthly budget).
@@ -76,7 +96,13 @@ A precise, minute-by-minute plan for launch day.
 
 * \[ \] CI/CD pipeline complete with all stages
 
+* \[ \] Branch protection and deployment approvals enabled for Prod
+
 * \[ \] Container images scanned and secrets rotated
+
+* \[ \] Production hardening checklist completed
+
+* \[ \] Incident response runbooks written
 
 * \[ \] **FinOps**: Billing alerts and budget thresholds configured
 

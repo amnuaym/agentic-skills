@@ -96,4 +96,6 @@ A story is "ready" for development when:
 - [ ] Acceptance criteria defined for all Must-Have stories
 - [ ] MVP scope agreed and documented
 - [ ] Non-functional requirements captured (including PII/Privacy triggers)
+- [ ] Iteration cadence decided (sprint length, ceremonies)
+- [ ] Definition of Done and Definition of Ready agreed by team
 - [ ] First sprint backlog ready

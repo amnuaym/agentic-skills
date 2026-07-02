@@ -84,6 +84,14 @@ Building on the strategy from Phase 1, build and test the actual migration proce
 
 * **Property-Based Testing**: Validate universal rules (like ensuring scores never go below zero).
 
+## Static Analysis & Security Scanning
+
+Run the SAST/dependency scanner chosen in Phase 1 as a CI stage, not an occasional manual check.
+
+* **Block on threshold**: fail the build on any finding at or above the CVSS threshold agreed in Phase 1 (default: 7.0).
+* **Track exceptions**: if a finding is accepted rather than fixed (e.g., no patch available yet), record the exception and rationale in `/docs/architecture` — don't let it silently disappear from the next scan's diff.
+* **Container images**: if using containers, scan images in the same pipeline stage, not as a separate afterthought.
+
 ## Documentation Maintenance
 
 * Automated CI jobs to compare documented values against config files.
@@ -98,9 +106,13 @@ Building on the strategy from Phase 1, build and test the actual migration proce
 
 * \[ \] Unit, Integration, and E2E test coverage meets thresholds
 
+* \[ \] Property-based tests cover critical invariants where applicable
+
 * \[ \] Performance baseline established
 
 * \[ \] App database migrations are versioned and rollback-safe
+
+* \[ \] No CVSS >= 7.0 findings open in static analysis (exceptions recorded if accepted rather than fixed)
 
 * \[ \] **SRE**: Logs are formatted as JSON and Trace IDs are tracked across services
 

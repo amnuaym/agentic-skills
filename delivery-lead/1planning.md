@@ -30,6 +30,14 @@ This phase establishes the architectural foundation before any code is written. 
 
 * **Safety Nets**: Always set a time limit (timeout) so systems do not wait forever if another part of the system breaks. Also, plan how to safely retry tasks if they fail the first time.
 
+## Security Scanning Approach
+
+Decide this now, not when Phase 2's Gate 2 check ("no CVSS ≥ 7.0 findings open") comes due — that check needs a scanner and a threshold policy to check against.
+
+* **Tool selection**: pick a SAST/dependency scanner appropriate to the stack (e.g., Semgrep, CodeQL, Snyk) and, separately, a container image scanner (e.g., Trivy, Grype) if containers are in play.
+* **Threshold policy**: agree what severity blocks a build (this skill defaults to CVSS ≥ 7.0 blocking Gate 2, but confirm that's right for this project) and where exceptions get recorded if a finding is accepted rather than fixed.
+* **Where results live**: findings and any accepted exceptions should be reviewable in `/docs/architecture`, not buried in a CI log that disappears after the next run.
+
 ## SRE & Observability Planning
 
 Before building the system in Phase 2, we need to decide how we will measure its health and reliability. You cannot write code to track goals if you have not defined what those goals are.
@@ -99,6 +107,8 @@ If replacing an old system, data migration is often the highest-risk component.
 * [ ] ADRs for: service split, API style, DB strategy, and communication patterns
 
 * [ ] **Communication**: Map out which features will use sync vs. async communication
+
+* [ ] **Security**: SAST/dependency scanning tool selected and CVSS action threshold agreed
 
 * [ ] **SRE**: Reliability goals (SLOs) and exact measurements (SLIs) defined for critical user journeys
 
