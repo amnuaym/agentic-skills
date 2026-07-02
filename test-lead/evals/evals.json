@@ -1,0 +1,50 @@
+{
+  "skill_name": "test-lead",
+  "evals": [
+    {
+      "id": 0,
+      "name": "strategy-design",
+      "prompt": "We're getting our portfolio management web app ready for its first release. Users link brokerage accounts, view holdings, see transaction history, and track performance/returns. Help me build a test strategy and write manual test cases, prioritized by risk, across the core areas.",
+      "expected_output": "A risk-based test strategy (scope, test levels, risk register ranking core areas like account linking, holdings, transactions, performance/returns) plus a set of concrete, executable manual test cases derived from that strategy, weighted toward the highest-risk areas (likely account linking/auth and returns calculations, since this is financial data).",
+      "files": [],
+      "assertions": [
+        {"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list"},
+        {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions"},
+        {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials"},
+        {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data"},
+        {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases"},
+        {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "automation-planning",
+      "prompt": "We have about 60 manual test cases written for our portfolio app's transaction-import (CSV upload) and holdings-calculation logic, but nothing automated yet. Help me figure out what to automate and set up a test pyramid.",
+      "expected_output": "An explicit automate-now/automate-later/manual decision framework applied to the described test cases, a justified test pyramid split (unit/integration/E2E) for CSV import and calculation logic specifically, framework/CI recommendations, and a flaky-test policy.",
+      "files": [],
+      "assertions": [
+        {"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation"},
+        {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio"},
+        {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases"},
+        {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)"},
+        {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic"},
+        {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)"},
+        {"text": "Addresses a flaky-test policy or how to handle intermittent failures"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "execution-reporting-under-pressure",
+      "prompt": "We just finished running our release candidate for the portfolio app -- 140 test cases executed, 12 defects found, 2 still-open Critical ones in the cost-basis/returns calculation logic. Product wants to ship tomorrow before earnings season. Help me pull together a test summary report and tell me if we're ready.",
+      "expected_output": "A test summary report (results overview, defect summary, risk areas open, recommendation) that does NOT quietly wave through the 2 open Critical defects -- it should surface the override/risk-acceptance path explicitly (state the risk, require explicit sign-off, document the decision) rather than just saying 'Go' or silently downgrading severity to make the ship date.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not recommend an unconditional 'Go' while 2 Critical defects remain open"},
+        {"text": "Explicitly surfaces a risk-acceptance / override path requiring named sign-off, rather than silently ignoring or downplaying the open Critical defects"},
+        {"text": "Produces a structured test summary report with distinct sections (e.g., results overview, defect summary, recommendation)"},
+        {"text": "Breaks results down by risk/severity rather than only reporting an aggregate pass rate (e.g., 140/152 passed)"},
+        {"text": "States a clear recommendation (Go / No-Go / Go-with-conditions) with explicit rationale, not just raw numbers left for the reader to interpret"}
+      ]
+    }
+  ]
+}
