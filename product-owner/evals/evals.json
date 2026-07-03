@@ -1,0 +1,45 @@
+{
+  "skill_name": "product-owner",
+  "evals": [
+    {
+      "id": 0,
+      "name": "vague-ask-elicitation",
+      "prompt": "We should add a way for users to export their data.",
+      "expected_output": "Instead of immediately producing a formatted user story from the vague ask, the response asks a small batch (2-3) of targeted clarifying questions about who needs this, why, what format/scope, and success criteria -- then offers a draft story with any unresolved points marked as explicit assumptions rather than silently guessed.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not immediately hand over a fully-formed, confident user story without first asking clarifying questions or flagging open assumptions"},
+        {"text": "Asks a small number of targeted questions (roughly 2-4), not a long unstructured list of ten or more"},
+        {"text": "Questions probe for the specific persona/user and the underlying value (why this matters), not just surface details like file format"},
+        {"text": "If a draft story or acceptance criteria is offered anyway, any unresolved detail is explicitly marked as an assumption (e.g. bracketed 'ASSUMPTION' or equivalent), not silently decided"},
+        {"text": "Does not ask about unrelated non-functional concerns (security, performance) before establishing the basic who/why of the request"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "everything-is-must-have",
+      "prompt": "For the next release we need all of these: SSO login, CSV export, a new dashboard, dark mode, and an audit log. They're all must-haves, the team just needs to build all of it.",
+      "expected_output": "Pushes back on treating five items as equally must-have, and forces an explicit prioritization pass (MoSCoW or RICE) rather than accepting the flat 'all must-have' framing at face value.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly challenges or questions the claim that all five items are equally Must-Have rather than accepting it uncritically"},
+        {"text": "Introduces or applies a concrete prioritization method (MoSCoW and/or RICE) to differentiate between the items"},
+        {"text": "Asks for or reasons about relative value/effort/risk across the five items rather than treating them as an undifferentiated bundle"},
+        {"text": "Does not simply proceed to write five stories all tagged Must-Have without pushback"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "stakeholder-conflict",
+      "prompt": "Sales wants the new pricing page to hide the free tier so people call sales instead. Support wants the free tier kept front and center because it cuts their ticket volume in half. I need to write the requirement for this page.",
+      "expected_output": "Surfaces both positions and the trade-off explicitly (revenue/sales-conversation goal vs. support-ticket-reduction goal) rather than silently picking one side, and asks the user to make the call or asks for a decision-maker/compromise rather than resolving it unilaterally.",
+      "files": [],
+      "assertions": [
+        {"text": "States both the Sales position and the Support position plainly rather than only addressing one"},
+        {"text": "Names the underlying trade-off (e.g. sales conversion vs. support ticket volume) explicitly"},
+        {"text": "Does not silently pick a side and draft the requirement around only one team's preference"},
+        {"text": "Asks the user to decide, name a decision-maker, or proposes an explicit compromise/experiment (e.g. A/B test) rather than presenting a unilateral resolution as settled fact"}
+      ]
+    }
+  ]
+}
