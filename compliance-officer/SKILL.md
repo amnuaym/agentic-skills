@@ -12,8 +12,8 @@ Assess compliance readiness only when a concrete regulatory signal shows up — 
 Engage this skill when the conversation contains one of these concrete signals:
 
 * Personal, health, or payment data is being collected, stored, processed, or transferred (PII, PHI, PCI)
-* A specific regulation or framework is named (GDPR, CCPA/CPRA, HIPAA, PCI-DSS, SOX, SOC 2, ISO 27001, or similar)
-* A DPIA / privacy impact assessment, or an audit/certification, is requested
+* A specific regulation or framework is named (GDPR, CCPA/CPRA, HIPAA, PCI-DSS, SOX, SOC 2, ISO 27001, OWASP, or similar)
+* A DPIA / privacy impact assessment, security review, or an audit/certification, is requested
 * Data crosses borders or moves between legal entities
 * The user explicitly asks for a compliance, privacy, or legal-adjacent review or sign-off
 
@@ -31,15 +31,15 @@ If a request is ambiguous, ask one clarifying question about what data or regula
 
 State this plainly whenever the skill engages:
 
-* This is a **generic compliance readiness process**, not legal advice, and not a substitute for qualified counsel or a certified auditor.
-* This skill does not currently ship deep, standard-specific reference material (no dedicated GDPR/HIPAA/PCI-DSS/SOX playbooks yet). It reasons from general control families that apply across most regimes, and names the specific standard(s) in scope so a deeper reference file can be added for that standard later, mirroring how `sre-engineer` and `delivery-lead` break detail out into phase files.
-* Never state or imply that something "is compliant" with a named regulation. State readiness or gaps against control families, and always flag when a qualified human reviewer must sign off before anything is represented externally as compliant or certified.
+* This is a **generic compliance readiness process**, not legal advice, and not a substitute for qualified counsel, a certified auditor, or a security professional.
+* Two standards now have dedicated reference files — see **Standards Coverage Today** below. Everything else (GDPR, HIPAA, PCI-DSS, SOX, etc.) still falls back to the generic control-family framework; name the specific standard so a deeper reference file can be added for it later, mirroring how `sre-engineer` and `delivery-lead` break detail out into phase files.
+* Never state or imply that something "is compliant" or "certified" against a named regulation or standard. State readiness or gaps against control families, and always flag when a qualified human reviewer must sign off before anything is represented externally as compliant or certified.
 
 ## The Compliance Readiness Loop
 
 1. **Detect & Name the Trigger** — State exactly what regulatory signal is present (data type, geography, industry, named framework). If it's unclear, ask rather than guessing broadly across every possible regulation.
 2. **Scope Applicability** — Ask which jurisdiction(s), data types, and industry context actually apply. Don't assume every major regulation applies by default — a US-only B2B tool with no EU users doesn't need a GDPR analysis just because GDPR is well-known.
-3. **Map to Control Families** — Pick only the families relevant to the specific ask, not the full list every time:
+3. **Map to Control Families** — If the standard in scope is ISO 27001 or OWASP, consult its dedicated reference file (below) for that standard's actual control set instead of relying on the generic list. Otherwise, pick only the families below relevant to the specific ask, not the full list every time:
    * Data minimization & purpose limitation
    * Legal basis / consent management
    * Access control & least privilege
@@ -53,12 +53,13 @@ State this plainly whenever the skill engages:
 
 ## Standards Coverage Today
 
-This skill currently reasons generically — it does not have dedicated reference files per regulation yet. When a specific standard is named (GDPR, HIPAA, PCI-DSS, SOX, etc.):
-
-* Name it explicitly in the output rather than speaking generically about "compliance"
-* Apply the generic control-family framework above to that standard's likely requirements
-* Flag clearly that deeper, standard-specific guidance isn't built into this skill yet, and recommend adding a reference file for that standard (e.g. `gdpr.md`, `hipaa.md`) as a future enhancement if it comes up repeatedly
-* Recommend legal/compliance specialist review before anything is represented as certified or compliant with that standard
+* **ISO 27001** — see `iso27001.md` for Annex A control domains, Statement of Applicability guidance, the certification audit path (Stage 1/Stage 2/surveillance), and common pitfalls. Use this instead of the generic control-family list whenever ISO 27001 is in scope.
+* **OWASP** — see `owasp.md` for the OWASP Top 10 web application risks, ASVS verification levels, and evidence typically requested (SAST/DAST/SCA, threat models, pen test reports). Note there: OWASP is a security benchmark, not a certifiable regulation — say so explicitly whenever it comes up.
+* **Everything else** (GDPR, CCPA/CPRA, HIPAA, PCI-DSS, SOX, SOC 2, etc.) does not have a dedicated reference file yet. When one of these is named:
+  * Name it explicitly in the output rather than speaking generically about "compliance"
+  * Apply the generic control-family framework above to that standard's likely requirements
+  * Flag clearly that deeper, standard-specific guidance isn't built into this skill yet, and recommend adding a reference file for it (e.g. `gdpr.md`, `hipaa.md`) as a future enhancement if it comes up repeatedly
+* Regardless of which standard is in scope, recommend legal/compliance/security specialist review before anything is represented as certified or compliant with it. If a referenced reference file is missing on disk, say so and fall back to the generic framework rather than inventing standard-specific detail.
 
 ## Rules of Engagement
 

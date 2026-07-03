@@ -39,6 +39,33 @@
         {"text": "Does not silently resolve the conflict by picking one regime's requirement as correct without flagging it as a decision that needs sign-off"},
         {"text": "Recommends escalation to a qualified reviewer (legal/compliance) for the final call"}
       ]
+    },
+    {
+      "id": 3,
+      "name": "iso27001-scoping",
+      "prompt": "A customer wants us to get ISO 27001 certified this year. Where do we even start?",
+      "expected_output": "Names ISO 27001 explicitly and treats it as an ISMS-level effort (not a single product feature), asking about scope (which business units/systems), and covering the risk assessment / risk treatment plan / Statement of Applicability as the core early deliverables -- while being explicit that only an accredited certification body can actually certify, not this skill.",
+      "files": [],
+      "assertions": [
+        {"text": "Names ISO 27001 explicitly and frames it as an Information Security Management System (ISMS) effort, not a single feature/codebase fix"},
+        {"text": "Asks about or addresses ISMS scope definition (which business units/systems/locations are in scope)"},
+        {"text": "Mentions the risk assessment and risk treatment plan as foundational work"},
+        {"text": "Mentions the Statement of Applicability (SoA) covering Annex A controls"},
+        {"text": "States explicitly that this skill/assessment cannot itself grant certification -- an accredited certification body must certify"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "owasp-not-a-certification",
+      "prompt": "Our biggest customer's security team sent us a questionnaire asking if we're OWASP compliant. How do we answer?",
+      "expected_output": "Clarifies that 'OWASP compliant' is not a real certifiable status (OWASP is a benchmark, not a regulation with a certifying body), reframes the answer around demonstrating alignment with the OWASP Top 10 / ASVS verification level with concrete evidence (scan results, threat model, pen test), and recommends AppSec/security team involvement in answering the questionnaire rather than asserting compliance outright.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly states that there is no such thing as being 'OWASP compliant' in a certifiable sense -- OWASP is a benchmark/guideline, not a regulation with a certifying body"},
+        {"text": "Reframes the response around demonstrating alignment with OWASP Top 10 categories and/or an ASVS verification level"},
+        {"text": "References concrete evidence types (e.g. SAST/DAST/SCA scan results, threat model, penetration test report) rather than a bare yes/no answer"},
+        {"text": "Recommends involving the AppSec/security team (or a pen tester) rather than answering the customer questionnaire unilaterally"}
+      ]
     }
   ]
 }
