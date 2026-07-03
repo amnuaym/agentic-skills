@@ -1,0 +1,70 @@
+{
+  "skill_name": "bcp-planner",
+  "evals": [
+    {
+      "id": 0,
+      "name": "bia-interview-pacing",
+      "prompt": "We need to do a BIA for our order-processing function. I'm the process owner, ask me what you need to know.",
+      "expected_output": "Asks a small batch of targeted BIA questions (roughly 3-5) covering a mix of process/dependency/impact categories, rather than dumping the entire question bank in one message, and doesn't invent a criticality tier, RTO, or RPO before getting real answers.",
+      "files": [],
+      "assertions": [
+        {"text": "Asks a bounded number of questions in the first turn (roughly 3-5), not a long exhaustive list covering every category at once"},
+        {"text": "Questions are specific and concrete (e.g. asking about supporting systems, dependencies, or impact at specific time intervals) rather than generic ('tell me about this process')"},
+        {"text": "Does not assign a criticality tier, RTO, or RPO before the process owner has actually answered impact/dependency questions"},
+        {"text": "Does not ask unrelated questions about other processes not yet in scope of this interview"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "unrealistic-rto-pushback",
+      "prompt": "For our internal expense-reporting tool, leadership says the RTO needs to be 15 minutes with zero data loss, same as our production payment system.",
+      "expected_output": "Pushes back on the RTO by asking about the actual impact of a longer outage for an internal expense tool (which is unlikely to have severe impact within hours), points out the cost/feasibility mismatch between an internal admin tool and a production payment system, and asks what impact-over-time data actually supports before accepting the target as-is.",
+      "files": [],
+      "assertions": [
+        {"text": "Questions or pushes back on the 15-minute/zero-data-loss target rather than accepting it and moving on"},
+        {"text": "Points out the mismatch between an internal expense tool and a production payment system in terms of typical criticality/impact"},
+        {"text": "Asks for or references impact-over-time reasoning (what actually happens at 4hr/24hr/etc.) to justify the RTO rather than taking the stated number at face value"},
+        {"text": "Does not simply record the RTO as agreed without surfacing the cost/feasibility trade-off"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "bcp-vs-dr-distinction",
+      "prompt": "Can you write us a DR plan that covers what happens if our main office building becomes inaccessible and staff can't come in for a few days?",
+      "expected_output": "Points out that 'staff can't access the building' is primarily a BCP concern (people, alternate work location, manual/remote continuity) rather than a DR Plan concern (which covers technical/IT systems recovery), and either redirects to producing BCP content or asks whether IT systems are also affected before writing DR content for something that isn't really a systems-recovery scenario.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly distinguishes BCP (people/process/facility continuity) from DR Plan (IT/systems recovery) in the context of this request"},
+        {"text": "Identifies that a building-access disruption with no stated system outage is primarily a BCP scenario, not a DR Plan scenario"},
+        {"text": "Does not simply produce a document labeled 'DR Plan' full of IT system recovery steps for a scenario that's actually about facility/people continuity"},
+        {"text": "Asks a clarifying question about whether systems/applications are also affected, if that's ambiguous from the request"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "gate-sequencing-dr-before-bia",
+      "prompt": "Skip the whole BIA interview process, we don't have time. Just write us a DR plan for our top 5 systems and assume they're all equally critical with a 1-hour RTO.",
+      "expected_output": "Does not simply comply by writing a DR plan with fabricated RTOs; instead states the risk of skipping the BIA explicitly (assumed criticality/RTO drives every downstream recovery investment and may be wrong), and asks for explicit confirmation of the override before proceeding, per the skill's gate override policy -- if it proceeds after pushback, it clearly flags the RTOs as unvalidated assumptions rather than presenting them as BIA-derived facts.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not silently comply and produce a DR plan presenting the assumed 1-hour RTO for all 5 systems as if it were a validated BIA finding"},
+        {"text": "States the risk of skipping the BIA explicitly (e.g. that recovery investment gets misallocated if criticality/RTO assumptions are wrong)"},
+        {"text": "Asks for explicit confirmation before proceeding with the override, rather than just proceeding or just refusing outright"},
+        {"text": "If it does proceed, marks the RTO/criticality assumptions clearly as unvalidated/provisional rather than as confirmed facts"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "single-point-of-failure-dependency",
+      "prompt": "Our payroll process depends on our HR system, which is a SaaS product from one vendor, and only one person (our payroll admin) knows how to run the manual backup process if the system is down. What should we flag here?",
+      "expected_output": "Identifies at least two distinct single points of failure -- the sole-vendor SaaS dependency (no redundancy/backup vendor) and the single trained person for the manual workaround (no backup/cross-training) -- and connects both to concrete BIA/strategy actions (vendor risk assessment or contractual RTO commitment, and cross-training or documenting the manual procedure) rather than just restating the facts back.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly identifies the single-vendor SaaS dependency as a single point of failure"},
+        {"text": "Explicitly identifies the single trained payroll admin as a single point of failure (key-person risk)"},
+        {"text": "Recommends a concrete mitigation for the vendor risk (e.g. vendor SLA/RTO commitment, backup vendor, or contractual continuity terms)"},
+        {"text": "Recommends a concrete mitigation for the key-person risk (e.g. cross-training a backup, documenting the manual procedure so it isn't tacit knowledge)"}
+      ]
+    }
+  ]
+}
