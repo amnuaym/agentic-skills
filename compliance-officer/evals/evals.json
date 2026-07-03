@@ -66,6 +66,20 @@
         {"text": "References concrete evidence types (e.g. SAST/DAST/SCA scan results, threat model, penetration test report) rather than a bare yes/no answer"},
         {"text": "Recommends involving the AppSec/security team (or a pen tester) rather than answering the customer questionnaire unilaterally"}
       ]
+    },
+    {
+      "id": 5,
+      "name": "iso42001-scoping-and-ai-act",
+      "prompt": "We're shipping an AI-powered resume screening feature and our enterprise customer wants to know if we're ISO 42001 certified, and whether that means we're covered under the EU AI Act. What should we tell them?",
+      "expected_output": "Names ISO 42001 explicitly and treats it as an AI management system effort scoped to the specific AI system (the resume screening feature), covering AI-specific risk/impact assessment (bias/fairness is especially relevant for a hiring-related AI system) and human oversight -- while explicitly stating that ISO 42001 certification does not by itself mean the system complies with the EU AI Act (a separate binding regulation), and recommending legal review given resume screening is a plausible high-risk use case under that Act.",
+      "files": [],
+      "assertions": [
+        {"text": "Names ISO 42001 explicitly and scopes it to the specific AI system (resume screening), not 'AI' generically"},
+        {"text": "Raises bias/fairness and human oversight as particularly relevant risk areas given this is a hiring-related AI system"},
+        {"text": "Explicitly states that ISO 42001 certification does not automatically mean compliance with the EU AI Act or other binding AI regulation -- treats them as distinct"},
+        {"text": "Recommends legal/compliance review specific to the EU AI Act rather than treating the ISO 42001 answer as sufficient on its own"},
+        {"text": "Does not assert the company 'is ISO 42001 certified' or 'is EU AI Act compliant' outright without evidence/qualification"}
+      ]
     }
   ]
 }
