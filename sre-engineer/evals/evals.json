@@ -1,0 +1,46 @@
+{
+  "skill_name": "sre-engineer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "slo-definition",
+      "prompt": "We're launching a new checkout API next month. Help me set up SLOs for it before we go live.",
+      "expected_output": "Asks about criticality/business impact before proposing a target, then produces concrete SLIs (availability/latency at minimum for a checkout path) with explicit SLO targets, measurement windows, and an error budget policy defining what happens when the budget is exhausted -- not just a bare percentage number.",
+      "files": [],
+      "assertions": [
+        {"text": "Asks about business impact/criticality (what breaks if this is down) before or alongside proposing a specific SLO number, rather than defaulting straight to a target"},
+        {"text": "Proposes concrete SLIs relevant to a checkout API (at least availability and latency)"},
+        {"text": "SLO targets include an explicit measurement window (e.g., rolling 28 days), not just a bare percentage"},
+        {"text": "Defines or asks about an error budget policy -- what happens when the budget is consumed/exhausted"},
+        {"text": "Does not propose a 100% or unqualified 'five nines' target without flagging the cost/effort trade-off"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "alert-without-runbook",
+      "prompt": "Just add a PagerDuty alert that fires when our API error rate goes above 5%.",
+      "expected_output": "Before wiring up the page, pushes back to ask what the runbook/mitigation steps are and whether the threshold is tied to actual user/SLO impact, rather than immediately confirming the alert will be added with no further questions.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not simply confirm the alert will be added without asking about a runbook or mitigation steps"},
+        {"text": "Raises the question of whether a flat 5% threshold is tied to actual user/SLO impact versus being an arbitrary raw threshold"},
+        {"text": "Asks what on-call is supposed to do when this alert fires (diagnostic/mitigation steps)"},
+        {"text": "Does not ignore the on-call/escalation angle entirely -- surfaces it as part of making the alert actionable"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "postmortem-blameless",
+      "prompt": "We had a Sev1 outage yesterday -- turns out the on-call engineer deployed a bad config change without reviewing it first. Help me write the postmortem.",
+      "expected_output": "Produces a blameless postmortem focused on the systemic/process gap (e.g., missing review/validation gate for config changes) rather than framing the write-up around blaming the individual engineer, and includes a timeline, root cause/contributing factors, impact, and action items with owners and due dates.",
+      "files": [],
+      "assertions": [
+        {"text": "Frames the root cause around the missing process/system safeguard (e.g., no review gate, no config validation) rather than centering blame on the individual engineer"},
+        {"text": "Does not use blaming language toward the specific engineer as the causal explanation"},
+        {"text": "Includes a structured postmortem with distinct sections (timeline, root cause/contributing factors, impact, action items)"},
+        {"text": "Action items include named owners and due dates, not just a bare list of things to fix"},
+        {"text": "Distinguishes proximate cause (the bad config push) from contributing factors (why the system allowed it through)"}
+      ]
+    }
+  ]
+}

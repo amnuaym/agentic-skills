@@ -1,0 +1,44 @@
+{
+  "skill_name": "compliance-officer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "no-trigger-stays-out",
+      "prompt": "Can you help me refactor this function to reduce cyclomatic complexity? It's just some internal math utility code, no user data involved.",
+      "expected_output": "Recognizes there is no compliance signal (no personal/regulated data, no named regulation, no explicit compliance ask) and either declines to engage the compliance framework at all or explicitly notes it isn't relevant here, instead of running a full compliance readiness assessment on a plain refactor request.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not produce a compliance readiness note, control-family mapping, or regulation analysis for this request"},
+        {"text": "Does not ask jurisdiction/data-classification questions unrelated to the refactor being requested"},
+        {"text": "If compliance is mentioned at all, it is only to note that no regulatory signal applies here, not as a substantive assessment"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "gdpr-signal-scoped",
+      "prompt": "We're adding an EU user signup flow that stores name, email, and IP address. What do we need to think about for GDPR?",
+      "expected_output": "Names GDPR explicitly, scopes applicability (EU users, personal data types involved), maps to relevant control families (legal basis/consent, data minimization, data subject rights, retention, breach notification), and identifies evidence needed per family -- without asserting the design 'is compliant' and without pulling in unrelated regulations (e.g. HIPAA, PCI-DSS) that don't apply to a signup flow.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly names GDPR rather than speaking only in generic 'compliance' terms"},
+        {"text": "Identifies relevant control families such as legal basis/consent, data minimization, retention, and data subject rights"},
+        {"text": "Does not assert or imply that the design 'is GDPR compliant' -- frames it as readiness/gaps instead"},
+        {"text": "Does not needlessly pull in unrelated frameworks (e.g. HIPAA, PCI-DSS, SOX) that don't apply to a signup flow with name/email/IP"},
+        {"text": "Flags that legal/DPO review is recommended before treating anything here as a compliance guarantee"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "conflicting-regimes",
+      "prompt": "A user in the EU asked us to delete all their data under GDPR, but our finance team says we're required to keep transaction records for 7 years under SOX. What do we do?",
+      "expected_output": "Names both regimes explicitly, states the conflict plainly (erasure right vs. retention requirement), and asks who should decide / recommends escalating to legal rather than silently picking one side or inventing a resolution unilaterally.",
+      "files": [],
+      "assertions": [
+        {"text": "Names both GDPR (erasure) and SOX (retention) explicitly as being in tension"},
+        {"text": "States the conflict plainly rather than glossing over it"},
+        {"text": "Does not silently resolve the conflict by picking one regime's requirement as correct without flagging it as a decision that needs sign-off"},
+        {"text": "Recommends escalation to a qualified reviewer (legal/compliance) for the final call"}
+      ]
+    }
+  ]
+}
