@@ -80,6 +80,71 @@
         {"text": "Recommends legal/compliance review specific to the EU AI Act rather than treating the ISO 42001 answer as sufficient on its own"},
         {"text": "Does not assert the company 'is ISO 42001 certified' or 'is EU AI Act compliant' outright without evidence/qualification"}
       ]
+    },
+    {
+      "id": 6,
+      "name": "hipaa-no-official-certification",
+      "prompt": "Our marketing team wants to put 'HIPAA Certified' on our website since we handle patient data for clinics. Is that accurate?",
+      "expected_output": "Corrects the claim -- there is no official HIPAA certification program, so 'HIPAA Certified' is a misleading marketing claim -- and reframes toward accurate language ('HIPAA compliant,' backed by a documented risk analysis and safeguards), while also checking whether the company is actually a covered entity or business associate and whether a risk analysis and BAAs with clinic customers exist.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly states that no official 'HIPAA Certified' credential exists and flags the marketing claim as inaccurate/misleading"},
+        {"text": "Recommends alternative accurate framing (e.g. 'HIPAA compliant' backed by documented controls) instead of a certification claim"},
+        {"text": "Asks or addresses whether the company is a covered entity or business associate"},
+        {"text": "Raises the need for a HIPAA risk analysis and/or Business Associate Agreements with the clinics as evidence, not just a marketing label"}
+      ]
+    },
+    {
+      "id": 7,
+      "name": "pci-dss-scoping-and-saq",
+      "prompt": "We're a small e-commerce store starting to accept credit cards directly on our own checkout page instead of redirecting to Stripe Checkout. What PCI requirements do we need to worry about?",
+      "expected_output": "Flags that hosting the card entry fields directly (rather than using a hosted/redirect solution) pulls raw cardholder data into the merchant's own CDE, substantially increasing PCI-DSS scope and likely SAQ complexity (e.g. SAQ A-EP or higher instead of SAQ A) -- and suggests that using a hosted payment field/tokenization approach would reduce scope, rather than just listing all 12 requirements without addressing the scoping decision itself.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that self-hosting the card entry form increases PCI-DSS scope compared to a redirect/hosted-fields approach"},
+        {"text": "Mentions the CDE (Cardholder Data Environment) concept or a scope-reduction option (tokenization, hosted fields) rather than jumping straight to listing all 12 requirements"},
+        {"text": "References the SAQ type distinction (e.g. SAQ A vs. SAQ A-EP or higher) as relevant to their specific architecture choice"},
+        {"text": "Does not assert the store is or will be 'PCI compliant' outright without qualification"}
+      ]
+    },
+    {
+      "id": 8,
+      "name": "sox-segregation-of-duties",
+      "prompt": "Our billing engineer wants to both write the code that changes subscription prices in our revenue system and personally approve and deploy that change to production, since he's the only one who understands that system. Is that a problem?",
+      "expected_output": "Flags this as a segregation-of-duties violation relevant to SOX ITGC (the same person cannot both author and approve/deploy a change to a system that materially affects financial reporting), and recommends a concrete remediation (a second reviewer/approver) rather than accepting the 'he's the only one who understands it' justification at face value.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly identifies this as a segregation-of-duties issue under SOX ITGC"},
+        {"text": "Does not accept 'he's the only one who understands the system' as sufficient justification to skip a second approver"},
+        {"text": "Recommends a concrete fix (e.g. a second reviewer/approver for changes to this financial system) rather than only describing the risk abstractly"},
+        {"text": "Frames this as relevant because the system materially affects financial reporting (subscription/revenue), not just as a generic code-review best practice"}
+      ]
+    },
+    {
+      "id": 9,
+      "name": "soc2-type-distinction",
+      "prompt": "A prospect is asking for our SOC 2 report before signing. We just finished a 2-week audit and got a report. Good to send over?",
+      "expected_output": "Asks or clarifies whether the report is Type I (point-in-time design) or Type II (operating effectiveness over a period, typically 6-12 months) before treating it as satisfying the prospect's request -- a 2-week engagement is far too short to be a Type II audit period, so this should be flagged as a likely Type I, which many enterprise prospects specifically want Type II for.",
+      "files": [],
+      "assertions": [
+        {"text": "Distinguishes Type I from Type II and asks or infers which one this report is"},
+        {"text": "Flags that a 2-week engagement is inconsistent with a Type II audit period (which requires evidence over 6-12 months), suggesting this is likely a Type I report"},
+        {"text": "Notes that many enterprise customers specifically expect Type II, so sending a Type I without clarifying could be a mismatch"},
+        {"text": "Does not simply say 'yes, send it over' without addressing the Type I vs Type II distinction"}
+      ]
+    },
+    {
+      "id": 10,
+      "name": "ccpa-ad-tech-sharing",
+      "prompt": "We're a California-based company with about $30M in annual revenue. We don't sell any customer data -- we just use Google Analytics and a couple of ad-tech pixels for retargeting campaigns. Are we in scope for CCPA?",
+      "expected_output": "Confirms the company meets the CCPA/CPRA revenue threshold ($25M+), and explains that ad-tech/retargeting pixel integrations likely qualify as 'sharing' (cross-context behavioral advertising) under CPRA even though no money changes hands -- so the 'we don't sell data' framing is likely incorrect, and opt-out/GPC obligations probably apply.",
+      "files": [],
+      "assertions": [
+        {"text": "Confirms the company meets the CCPA/CPRA applicability threshold based on the stated $30M revenue"},
+        {"text": "Explains that ad-tech/retargeting pixels can constitute 'sharing' under CPRA even without a literal sale of data"},
+        {"text": "Pushes back on the assumption that 'we don't sell data' means they're out of scope"},
+        {"text": "Mentions the opt-out mechanism and/or Global Privacy Control (GPC) signal handling as a likely obligation given this scenario"}
+      ]
     }
   ]
 }

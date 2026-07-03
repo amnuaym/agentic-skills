@@ -32,14 +32,14 @@ If a request is ambiguous, ask one clarifying question about what data or regula
 State this plainly whenever the skill engages:
 
 * This is a **generic compliance readiness process**, not legal advice, and not a substitute for qualified counsel, a certified auditor, or a security professional.
-* Three standards now have dedicated reference files — see **Standards Coverage Today** below. Everything else (GDPR, HIPAA, PCI-DSS, SOX, etc.) still falls back to the generic control-family framework; name the specific standard so a deeper reference file can be added for it later, mirroring how `sre-engineer` and `delivery-lead` break detail out into phase files.
+* Nine standards now have dedicated reference files — see **Standards Coverage Today** below. Any standard not listed there (FedRAMP, NIST 800-53, COPPA, PIPEDA, etc.) still falls back to the generic control-family framework; name the specific standard so a deeper reference file can be added for it later, mirroring how `sre-engineer` and `delivery-lead` break detail out into phase files.
 * Never state or imply that something "is compliant" or "certified" against a named regulation or standard. State readiness or gaps against control families, and always flag when a qualified human reviewer must sign off before anything is represented externally as compliant or certified.
 
 ## The Compliance Readiness Loop
 
 1. **Detect & Name the Trigger** — State exactly what regulatory signal is present (data type, geography, industry, named framework). If it's unclear, ask rather than guessing broadly across every possible regulation.
 2. **Scope Applicability** — Ask which jurisdiction(s), data types, and industry context actually apply. Don't assume every major regulation applies by default — a US-only B2B tool with no EU users doesn't need a GDPR analysis just because GDPR is well-known.
-3. **Map to Control Families** — If the standard in scope is ISO 27001, ISO 42001, or OWASP, consult its dedicated reference file (below) for that standard's actual control set instead of relying on the generic list. Otherwise, pick only the families below relevant to the specific ask, not the full list every time:
+3. **Map to Control Families** — If the standard in scope has a dedicated reference file (see **Standards Coverage Today**), consult it for that standard's actual requirements instead of relying on the generic list. Otherwise, pick only the families below relevant to the specific ask, not the full list every time:
    * Data minimization & purpose limitation
    * Legal basis / consent management
    * Access control & least privilege
@@ -53,14 +53,27 @@ State this plainly whenever the skill engages:
 
 ## Standards Coverage Today
 
-* **ISO 27001** — see `iso27001.md` for Annex A control domains, Statement of Applicability guidance, the certification audit path (Stage 1/Stage 2/surveillance), and common pitfalls. Use this instead of the generic control-family list whenever ISO 27001 is in scope.
-* **ISO 42001** — see `iso42001.md` for the AI Management System (AIMS) Annex A categories, AI-specific risk/impact assessment (bias, safety, human oversight), and its relationship to binding AI regulation (e.g., EU AI Act) and to ISO 27001. Use this instead of the generic control-family list whenever ISO 42001 or general "AI governance/compliance" is in scope.
-* **OWASP** — see `owasp.md` for the OWASP Top 10 web application risks, ASVS verification levels, and evidence typically requested (SAST/DAST/SCA, threat models, pen test reports). Note there: OWASP is a security benchmark, not a certifiable regulation — say so explicitly whenever it comes up.
-* **Everything else** (GDPR, CCPA/CPRA, HIPAA, PCI-DSS, SOX, SOC 2, etc.) does not have a dedicated reference file yet. When one of these is named:
-  * Name it explicitly in the output rather than speaking generically about "compliance"
-  * Apply the generic control-family framework above to that standard's likely requirements
-  * Flag clearly that deeper, standard-specific guidance isn't built into this skill yet, and recommend adding a reference file for it (e.g. `gdpr.md`, `hipaa.md`) as a future enhancement if it comes up repeatedly
-* Regardless of which standard is in scope, recommend legal/compliance/security specialist review before anything is represented as certified or compliant with it. If a referenced reference file is missing on disk, say so and fall back to the generic framework rather than inventing standard-specific detail.
+Nine reference files cover the standards named in this skill's trigger list. Consult the relevant one instead of the generic control-family list whenever that standard is in scope:
+
+| Standard | Reference file | Nature |
+|---|---|---|
+| GDPR | `gdpr.md` | Binding EU regulation — legal basis, subject rights, DPIA, breach notification |
+| CCPA/CPRA | `ccpa-cpra.md` | Binding California law — opt-out model, sale/sharing definition, GPC signal |
+| HIPAA | `hipaa.md` | Binding US law — Privacy/Security/Breach Notification Rules, BAAs; no official certification exists |
+| PCI-DSS | `pci-dss.md` | Card-brand contractual standard — CDE scoping, SAQ/ROC assessment paths |
+| SOX | `sox.md` | Binding US law — ICFR, ITGC (change management, access control, segregation of duties) |
+| SOC 2 | `soc2.md` | CPA-firm attestation report (not a certificate) — Type I/II, Trust Services Criteria |
+| ISO 27001 | `iso27001.md` | Voluntary certifiable ISMS standard — Annex A, Statement of Applicability, Stage 1/2 audits |
+| ISO 42001 | `iso42001.md` | Voluntary certifiable AIMS standard — AI-specific risk/impact assessment, human oversight |
+| OWASP | `owasp.md` | Security benchmark, not a regulation — Top 10, ASVS verification levels |
+
+For any standard not in this table (FedRAMP, NIST 800-53, COPPA, PIPEDA, industry-specific rules, etc.):
+
+* Name it explicitly in the output rather than speaking generically about "compliance"
+* Apply the generic control-family framework above to that standard's likely requirements
+* Flag clearly that deeper, standard-specific guidance isn't built into this skill yet, and recommend adding a reference file for it as a future enhancement if it comes up repeatedly
+
+Regardless of which standard is in scope, recommend legal/compliance/security specialist review before anything is represented as certified or compliant with it. If a referenced reference file is missing on disk, say so and fall back to the generic framework rather than inventing standard-specific detail.
 
 ## Rules of Engagement
 
