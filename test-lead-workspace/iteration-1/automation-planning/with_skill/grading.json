@@ -1,0 +1,16 @@
+{
+  "expectations": [
+    {"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation", "passed": true, "evidence": "Section 2 table assigns every one of the reconstructed 60 cases to Automate-now (52), Automate-later (3), or Manual/exploratory (5) with a stated reason per group, and explicitly names the 5 manual-forever cases (screen-reader UX, wording polish, concurrent-upload race probing)."},
+    {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio", "passed": true, "evidence": "Section 1: 65/25/10 split explicitly justified as skewed further unit-heavy than a generic 70/20/10 default because 'both of this feature's High-risk areas...are naturally pure-function business logic with almost no I/O dependency.'"},
+    {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases", "passed": true, "evidence": "Group A lists 16 cases including 'missing columns, wrong delimiter, encoding issues (UTF-8/BOM), extra whitespace, empty file, header-only file.'"},
+    {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)", "passed": true, "evidence": "Groups E/F list 'FIFO/average-cost lot tracking, partial sells, multiple buys at different prices, fractional shares, short positions... stock split adjustment, dividend reinvestment, merger/spin-off adjustment.'"},
+    {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic", "passed": true, "evidence": "Section 2, Group E: 'This is the highest-value automation in the whole suite... a unit test with a known-correct expected value is [the reliable oracle].'"},
+    {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)", "passed": true, "evidence": "Section 4 table maps unit->every PR (blocks merge), integration->merge to main (blocks staging deploy), E2E->nightly (reports only) and pre-release (blocks release)."},
+    {"text": "Addresses a flaky-test policy or how to handle intermittent failures", "passed": true, "evidence": "Section 5 defines identification threshold (2 failures in 10 rolling CI runs), quarantine tagging, ownership assignment, a 2-week fix-by date, and weekly Test Lead review of quarantine-list size."}
+  ],
+  "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0},
+  "timing": {"total_duration_seconds": 93.8},
+  "eval_feedback": {
+    "overall": "Strong, discriminating run. This run correctly flagged that it was never given the actual 60 test cases or a real Phase 0 risk register, so it reconstructed a plausible taxonomy and explicitly labeled the automate/manual decision table as a draft pending reconciliation with real case IDs -- good calibrated honesty, not overclaiming."
+  }
+}

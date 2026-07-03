@@ -1,0 +1,13 @@
+{
+  "eval_id": 0,
+  "eval_name": "strategy-design",
+  "prompt": "We're getting our portfolio management web app ready for its first release. Users link brokerage accounts, view holdings, see transaction history, and track performance/returns. Help me build a test strategy and write manual test cases, prioritized by risk, across the core areas.",
+  "assertions": [
+    {"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list"},
+    {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions"},
+    {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials"},
+    {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data"},
+    {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases"},
+    {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)"}
+  ]
+}

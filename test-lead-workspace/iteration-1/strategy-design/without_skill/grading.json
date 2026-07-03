@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list", "passed": true, "evidence": "Section 1.3 'Risk Assessment by Core Area' table ranks 12 areas Critical/High/Medium/Low with a 'Key Risks' rationale column."},
+    {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions", "passed": true, "evidence": "Section 2 uses dense tables with ID/Title/Priority/Preconditions/Steps/Expected Result columns (AL-01 through UI-04)."},
+    {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials", "passed": true, "evidence": "Risk table ranks 'Account Linking' and 'Authentication & Authorization' both as Critical."},
+    {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data", "passed": true, "evidence": "Risk table ranks 'Performance/Returns' as High, and section 2.5 has 10 dedicated PF-xx cases including golden-dataset reconciliation (PF-01)."},
+    {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases", "passed": true, "evidence": "Section 1.6 'Entry / Exit Criteria' defines build/environment entry conditions and 5 exit conditions including pass-rate thresholds."},
+    {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)", "passed": true, "evidence": "AL-02 (invalid creds), AL-08 (broker outage), HV-05/06 (empty/delisted holdings), TX-04 (timezone edge case) are explicit negative/edge cases."}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0},
+  "timing": {"total_duration_seconds": 108.5},
+  "eval_feedback": {
+    "overall": "Baseline quality is high here -- general model knowledge of fintech test strategy conventions is strong enough that the assertions as written don't separate the skill from no-skill. See with_skill grading.json note: the actual differentiator is gate/phase process discipline, which this run has no concept of by construction (no skill = no gates)."
+  }
+}

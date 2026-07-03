@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "skill_name": "test-lead",
+    "skill_path": "D:\\Github\\agentic-skills\\test-lead",
+    "executor_model": "claude-sonnet-5",
+    "analyzer_model": "claude-sonnet-5",
+    "timestamp": "2026-07-02T00:00:00Z",
+    "evals_run": ["strategy-design", "automation-planning", "execution-reporting-under-pressure"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "strategy-design",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 1.0, "passed": 6, "total": 6, "time_seconds": 163.3, "tokens": 55313, "errors": 0},
+      "expectations": [
+        {"text": "Includes a risk register or ranking that scores the core areas by risk, not just a flat feature list", "passed": true, "evidence": "Risk-Based Prioritization table ranks 11 items High/Medium/Low with rationale."},
+        {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result)", "passed": true, "evidence": "38 cases formatted as ID/Title/Priority/Preconditions/Steps/Expected Result/Test Data blocks."},
+        {"text": "Identifies account linking / authentication as a high-risk area", "passed": true, "evidence": "Ranked High; dedicated Security & Session Isolation section."},
+        {"text": "Identifies performance/returns calculation as a high-risk area", "passed": true, "evidence": "Ranked High; 7 dedicated cases with hand-calculated verification."},
+        {"text": "Defines entry and/or exit criteria for the test effort", "passed": true, "evidence": "Section 4 lists 4 entry and 6 exit conditions."},
+        {"text": "Includes negative or edge-case test cases", "passed": true, "evidence": "Invalid creds, outage, network loss, zero positions, large volume, fractional shares, flat performance cases present."}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "strategy-design",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 1.0, "passed": 6, "total": 6, "time_seconds": 108.5, "tokens": 41692, "errors": 0},
+      "expectations": [
+        {"text": "Includes a risk register or ranking that scores the core areas by risk, not just a flat feature list", "passed": true, "evidence": "Risk Assessment by Core Area table ranks 12 areas Critical/High/Medium/Low."},
+        {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result)", "passed": true, "evidence": "Dense tables with ID/Title/Priority/Preconditions/Steps/Expected Result columns."},
+        {"text": "Identifies account linking / authentication as a high-risk area", "passed": true, "evidence": "Both 'Account Linking' and 'Authentication & Authorization' ranked Critical."},
+        {"text": "Identifies performance/returns calculation as a high-risk area", "passed": true, "evidence": "Ranked High; 10 dedicated PF-xx cases including golden-dataset reconciliation."},
+        {"text": "Defines entry and/or exit criteria for the test effort", "passed": true, "evidence": "Section 1.6 defines entry conditions and 5 exit conditions."},
+        {"text": "Includes negative or edge-case test cases", "passed": true, "evidence": "Invalid creds, broker outage, empty/delisted holdings, timezone edge cases present."}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "automation-planning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 1.0, "passed": 7, "total": 7, "time_seconds": 93.8, "tokens": 45756, "errors": 0},
+      "expectations": [
+        {"text": "Gives an explicit automate-now/automate-later/keep-manual decision framework", "passed": true, "evidence": "Every one of the 60 reconstructed cases assigned to one of the three buckets, with 5 cases explicitly kept manual for named reasons."},
+        {"text": "Proposes a justified test pyramid split tied to this domain", "passed": true, "evidence": "65/25/10, explicitly skewed further unit-heavy than a generic 70/20/10 default because the risk areas are pure-function logic."},
+        {"text": "Addresses CSV import specifically, including malformed-file edge cases", "passed": true, "evidence": "16-case group covering missing columns, delimiters, encoding, empty/header-only files."},
+        {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases", "passed": true, "evidence": "FIFO/average-cost, partial sells, fractional shares, splits, dividend reinvestment."},
+        {"text": "Recommends unit tests as the primary home for calculation logic", "passed": true, "evidence": "Explicitly the highest-value automation target in the plan."},
+        {"text": "Addresses CI integration timing", "passed": true, "evidence": "PR/merge/nightly/pre-release table with explicit blocking rules per level."},
+        {"text": "Addresses a flaky-test policy", "passed": true, "evidence": "Identification threshold, quarantine tagging, ownership, fix-by date, weekly review."}
+      ],
+      "notes": ["Explicitly flagged that the 60 real cases/risk register were never supplied and reconstructed a taxonomy, marking the decision table as draft pending reconciliation."]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "automation-planning",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 0.71, "passed": 5, "total": 7, "time_seconds": 62.4, "tokens": 36615, "errors": 0},
+      "expectations": [
+        {"text": "Gives an explicit automate-now/automate-later/keep-manual decision framework", "passed": false, "evidence": "Every bucket (A-D) is destined for automation; no 'keep manual/exploratory' category exists anywhere in the plan."},
+        {"text": "Proposes a justified test pyramid split tied to this domain", "passed": true, "evidence": "70-75/20-25/5 split reasoned by pure-function vs browser-only characteristics."},
+        {"text": "Addresses CSV import specifically, including malformed-file edge cases", "passed": true, "evidence": "Missing/extra columns, encoding, malformed rows all covered."},
+        {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases", "passed": true, "evidence": "FIFO/LIFO/average cost, rounding/precision, zero/negative positions covered."},
+        {"text": "Recommends unit tests as the primary home for calculation logic", "passed": true, "evidence": "'Holdings calculation unit tests' is a first-class Layer 1 subsection."},
+        {"text": "Addresses CI integration timing", "passed": true, "evidence": "Guardrails section states unit+integration on every PR, E2E pre-merge/nightly."},
+        {"text": "Addresses a flaky-test policy", "passed": false, "evidence": "No identification/quarantine/ownership process defined; only mentions decimal-precision as a root cause of flakiness to avoid."}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "execution-reporting-under-pressure",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 1.0, "passed": 5, "total": 5, "time_seconds": 92.5, "tokens": 45114, "errors": 0},
+      "expectations": [
+        {"text": "Does not recommend an unconditional 'Go' with 2 Critical defects open", "passed": true, "evidence": "Headline: 'NO-GO (as of this report) -- pending Gate Override / explicit executive sign-off.'"},
+        {"text": "Explicitly surfaces a risk-acceptance/override path requiring named sign-off", "passed": true, "evidence": "Dedicated Gate Override Policy section with a fillable Go-with-conditions template requiring name/title/date."},
+        {"text": "Produces a structured test summary report with distinct sections", "passed": true, "evidence": "11 distinct sections from Recommendation through Bottom Line."},
+        {"text": "Breaks results down by risk/severity rather than only an aggregate pass rate", "passed": true, "evidence": "Explicitly refuses to compute a pass-rate percentage since severity breakdown of the other 10 defects wasn't supplied, logging it as an open item instead."},
+        {"text": "States a clear Go/No-Go/Go-with-conditions recommendation with rationale", "passed": true, "evidence": "Bottom Line restates verdict and exact conditions for it to change."}
+      ],
+      "notes": ["Refused to fabricate a pass-rate percentage from insufficient data -- flagged every unconfirmed number instead."]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "execution-reporting-under-pressure",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {"pass_rate": 1.0, "passed": 5, "total": 5, "time_seconds": 46.9, "tokens": 35206, "errors": 0},
+      "expectations": [
+        {"text": "Does not recommend an unconditional 'Go' with 2 Critical defects open", "passed": true, "evidence": "'DO NOT SHIP as-is. Conditional GO only if the 2 open Critical defects... are resolved and re-verified.'"},
+        {"text": "Explicitly surfaces a risk-acceptance/override path requiring named sign-off", "passed": true, "evidence": "'Get explicit written sign-off from Product/Business... do not let this be an implicit/undocumented decision.' Less formalized than a named template, but present."},
+        {"text": "Produces a structured test summary report with distinct sections", "passed": true, "evidence": "7 distinct sections from Executive Summary through Bottom Line."},
+        {"text": "Breaks results down by risk/severity rather than only an aggregate pass rate", "passed": true, "evidence": "Splits Critical (2) from combined High/Medium/Low (10), though coarser than a full tier table."},
+        {"text": "States a clear Go/No-Go/Go-with-conditions recommendation with rationale", "passed": true, "evidence": "Bottom Line explains why defect location matters more than defect count."}
+      ],
+      "notes": ["Headlines a specific-looking '91% pass rate' computed from an unstated assumption (defect count == failing case count, zero blocked/skipped) -- flagged as a caveat but still prominently displayed as a hard number in the Executive Summary."]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 116.53, "stddev": 38.66, "min": 92.5, "max": 163.3},
+      "tokens": {"mean": 48727.67, "stddev": 5546.0, "min": 45114, "max": 55313}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.90, "stddev": 0.17, "min": 0.71, "max": 1.0},
+      "time_seconds": {"mean": 72.6, "stddev": 32.16, "min": 46.9, "max": 108.5},
+      "tokens": {"mean": 37837.67, "stddev": 3505.0, "min": 35206, "max": 41692}
+    },
+    "delta": {
+      "pass_rate": "+0.10",
+      "time_seconds": "+43.9",
+      "tokens": "+10890"
+    }
+  },
+  "notes": [
+    "Only eval 1 (automation-planning) is quantitatively discriminating -- evals 0 and 2 score 100% for both configurations because a strong baseline model already knows fintech test-strategy and release-gating conventions well. This doesn't mean the skill adds no value on those two evals: qualitatively, with_skill is more procedurally rigorous (explicit gate/phase checklists tied verbatim to SKILL.md, refusal to fabricate an unverified pass-rate figure) but the current assertions don't capture that distinction numerically.",
+    "The clearest, most reproducible skill value shown is in automation-planning: the skill's Phase 2 guidance (2automation.md) explicitly requires a three-way automate-now/automate-later/keep-manual decision and a flaky-test policy. The baseline defaulted to 'automate everything' and had zero flaky-test governance -- both are concrete, named parts of the skill that a general-purpose baseline had no way to reproduce.",
+    "with_skill runs took ~1.6x longer and used ~29% more tokens on average, mostly because they explicitly work through the skill's phase deliverables checklists and call out unmet gates -- a reasonable and expected cost of the extra rigor, not inefficiency.",
+    "In execution-reporting-under-pressure, the without_skill run computed and headlined a precise-looking '91% pass rate' derived from an unstated assumption, while with_skill explicitly refused to compute a number from insufficient data. No current assertion catches this; recommend adding one in a future iteration (e.g., 'does not present an unverified/assumed statistic as a precise, confidence-inspiring number without equal prominence given to the caveat')."
+  ]
+}

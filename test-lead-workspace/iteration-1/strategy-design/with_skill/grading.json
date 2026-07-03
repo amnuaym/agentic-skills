@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list", "passed": true, "evidence": "Section 3, 'Risk-Based Prioritization' table ranks 11 items by Likelihood x Impact into High/Medium/Low tiers with rationale, and explicitly checks its own distribution ('5 of 11 items (~45%) are High...')."},
+    {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions", "passed": true, "evidence": "38 test cases (TC-LINK-01 through TC-A11Y-02) each formatted as ID/Title/Priority/Preconditions/Steps/Expected Result/Test Data code blocks."},
+    {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials", "passed": true, "evidence": "Risk table row #1 ranks 'Account linking' High, and Section B is a dedicated 'Security & Session Isolation (High Risk)' group with 5 cases."},
+    {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data", "passed": true, "evidence": "Risk table row #2 ranks 'Performance & returns calculations' High ('Silent calculation errors are the single most damaging bug class...'); Section E has 7 dedicated cases including hand-calculated verification (TC-PERF-01, 02)."},
+    {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases", "passed": true, "evidence": "Section 4 'Entry & Exit Criteria' lists 4 entry conditions and 6 exit conditions including waiver rules for financial calculation cases."},
+    {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)", "passed": true, "evidence": "TC-LINK-04/05/06 (invalid creds, outage, network loss), TC-HOLD-04/05/06 (zero positions, large volume, fractional shares), TC-PERF-06/07 (no history, flat performance) are all explicit negative/edge cases."}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0},
+  "timing": {"total_duration_seconds": 163.3},
+  "eval_feedback": {
+    "overall": "This eval is not discriminating on its own -- the without_skill baseline also passes all 6 assertions with comparable structure and depth, because a well-known domain (risk-based test strategy for a fintech app) is within general model knowledge. The differentiator here isn't presence/absence of these elements but process rigor: with_skill explicitly labels its work as 'Phase 0'/'Phase 1', maintains a live deliverables checklist, and proactively calls out that Gate 1 (peer review) is unmet and blocks progression -- none of which the baseline does since it has no concept of gates. Consider adding an assertion that checks for this gate-awareness/checklist behavior specifically, since that's the actual skill-specific value being tested here."
+  }
+}

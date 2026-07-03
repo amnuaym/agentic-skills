@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "test-lead", "runs": [{"id": "strategy-design-with_skill", "prompt": "We're getting our portfolio management web app ready for its first release. Users link brokerage accounts, view holdings, see transaction history, and track performance/returns. Help me build a test strategy and write manual test cases, prioritized by risk, across the core areas.", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# Portfolio Management Web App \u2014 Test Strategy & Manual Test Cases (First Release)\n\n**Prepared by:** Test Lead (AI-assisted)\n**Date:** 2026-07-02\n**Status:** Draft for review \u2014 Phase 0 (Test Strategy) and Phase 1 (Test Design)\n\n> **Assumptions made (no clarifying questions asked, per instructions):**\n> - This is a web app (desktop browser primary, responsive is a nice-to-have, not gating this release).\n> - Brokerage linking is via a third-party aggregator (e.g., Plaid-style OAuth/credential-based linking), not a direct broker API integration built in-house.\n> - Holdings, transaction history, and performance/returns are read-only views for this release \u2014 no trading, no money movement, no order placement in-app.\n> - The app handles real financial account data, so it is treated as a **high-sensitivity financial application** even though it doesn't move money.\n> - Single currency (USD) and single-user accounts (no multi-user/household sharing) for v1.\n> - A staging environment with sandbox/test brokerage credentials is assumed available (standard for aggregators like Plaid, Yodlee, MX, Finicity).\n> - Team is small: one test lead/QA doing manual design, developers assist with review and unit/integration tests.\n>\n> Where an assumption materially changes scope, it's called out inline so it can be corrected before execution.\n\n---\n\n## Phase 0 \u2014 Test Strategy\n\n### 1. Scope\n\n**In scope for this release's test effort:**\n- Account linking: connecting a brokerage account via the aggregator flow (OAuth/credential handoff), link status, re-authentication when a link expires.\n- Holdings view: positions, quantities, current value, cost basis (if shown), asset allocation.\n- Transaction history: buys/sells/dividends/transfers pulled from linked accounts, filtering/sorting, pagination.\n- Performance & returns: time-weighted or simple return calculations, gain/loss, performance over time ranges (e.g., 1M/YTD/1Y/All).\n- Account management: unlinking/removing a brokerage account, viewing multiple linked accounts, refreshing data.\n- Cross-cutting: authentication/session security, data sync/refresh behavior, error handling when the aggregator or broker is unavailable.\n\n**Explicitly out of scope for this test effort:**\n- **Trading/order execution** \u2014 not in this release; no test coverage needed since the feature doesn't exist.\n- **Internals of the brokerage/aggregator's own systems** \u2014 we test our integration against the aggregator's sandbox/API contract, not the aggregator's correctness or the broker's back-end accuracy.\n- **Tax lot accounting / tax document generation** \u2014 not in this release unless confirmed otherwise.\n- **Mobile native apps** \u2014 this release is web-only; responsive browser behavior is smoke-tested only, not a full parallel matrix.\n- **Localization/multi-currency** \u2014 USD/single-locale assumed for v1.\n- **Load/scale testing at production-scale user volume** \u2014 basic performance sanity only (see Test Levels); full load testing deferred to a dedicated performance testing pass before broader marketing/launch scale-up.\n\n**Environments in scope for sign-off:** Staging (with sandbox brokerage credentials from the aggregator) is the primary sign-off environment. A production smoke test (read-only checks: login, view a real linked account, view holdings) is required post-deploy before the release is considered fully closed.\n\n### 2. Test Levels\n\n| Level | Applies? | Answers | Owner |\n|---|---|---|---|\n| Unit | Yes | Do return/gain-loss calculations, aggregation logic, and data transformers produce correct results in isolation? | Developers |\n| Integration | Yes | Does our backend correctly call the aggregator API, persist linked-account data, and reconcile sync responses? | Developers / QA |\n| System / E2E | Yes | Does the full journey \u2014 link account \u2192 view holdings \u2192 view transactions \u2192 view performance \u2014 work end to end? | QA |\n| UAT | Yes (lightweight) | Does a real user (internal beta or product owner acting as proxy) find the numbers trustworthy and the flows intuitive? | Product / beta users |\n| Performance | Yes (scoped) | Does the app stay responsive with realistic data volumes (large transaction histories, multiple linked accounts) and during aggregator sync delays? | QA / SRE |\n| Security | Yes (elevated priority) | Can account credentials, linked-account tokens, or financial data be exposed, intercepted, or accessed by the wrong user? | Security / QA |\n| Accessibility | Yes (baseline) | Can key flows (link account, view holdings/returns) be completed via keyboard and screen reader, and do numeric displays meet contrast/labeling basics? | QA |\n\nSecurity and correctness of financial calculations are elevated above typical web-app defaults because this is money-adjacent data \u2014 even without trade execution, a wrong balance or a leaked credential is a trust-ending bug for this product category.\n\n### 3. Risk-Based Prioritization\n\nFeatures/journeys scored on **Likelihood \u00d7 Impact**. This release is new (everything is \"new code\" from a likelihood standpoint), so ranking leans on **impact** and on which components are hardest to get right (third-party integration, financial math) to avoid the \"everything is High\" trap.\n\n| # | Feature / Journey | Likelihood | Impact | Risk Tier | Rationale |\n|---|---|---|---|---|---|\n| 1 | Account linking (OAuth/credential flow, success + failure paths) | High (new, third-party dependency, many failure modes) | High (broken link = zero value from the app; credential mishandling = severe trust/security issue) | **High** | Gateway to every other feature; highest surface area for third-party failure and security exposure. |\n| 2 | Performance & returns calculations | High (custom math, easy to get subtly wrong) | High (wrong numbers directly mislead a user's financial decisions \u2014 this is the core value prop) | **High** | Silent calculation errors are the single most damaging bug class for this product; users won't necessarily notice a wrong return % is wrong. |\n| 3 | Holdings accuracy (positions, quantities, current value) | Medium-High (depends on correct sync + valuation) | High (wrong holdings = user distrust, potential real-world financial decisions made on bad data) | **High** | Directly visible, directly consequential if wrong. |\n| 4 | Transaction history accuracy & completeness | Medium (sync/pagination logic) | High (missing or duplicated transactions undermine trust and can misstate performance) | **High** | Feeds performance calculations \u2014 errors here cascade into risk #2. |\n| 5 | Session/account security & data isolation (auth, authorization, token storage) | Medium (standard patterns, but consequences severe if wrong) | High (cross-account data leakage or credential exposure is a severe/regulatory-adjacent issue) | **High** | Low likelihood if built on solid frameworks, but impact is severe enough to keep in the top tier. |\n| 6 | Account sync/refresh behavior (manual refresh, stale data indicators, background sync) | Medium | Medium | **Medium** | Annoying if wrong (stale data shown as current) but usually visible/correctable, not silently catastrophic. |\n| 7 | Unlinking/removing a brokerage account | Low-Medium | Medium (data should be fully removed/disassociated; partial removal is a privacy concern) | **Medium** | Used less frequently, but privacy implications keep it out of Low. |\n| 8 | Multi-account aggregation (viewing combined holdings/performance across accounts) | Medium | Medium | **Medium** | Adds complexity on top of already-tested single-account logic; incremental risk. |\n| 9 | Filtering/sorting transaction history UI | Low | Low-Medium | **Medium** | Usability issue if broken, not a data-integrity issue. |\n| 10 | General navigation, empty states, onboarding copy | Low | Low | **Low** | Cosmetic/UX; failure is annoying, not harmful. |\n| 11 | Notification/email on link failure (if present) | Low | Low | **Low** | Nice-to-have; absence doesn't block core value. |\n\n**Distribution check:** 5 of 11 items (~45%) are High. This is above the \"roughly a third\" guideline, so it's worth stating explicitly why: this app's core value (holdings + performance) *is* financial-data accuracy plus a third-party integration, so the concentration of High-risk items in \"does the money math check out\" and \"is the link secure\" reflects the product's actual risk profile, not a failure to discriminate. Items 6\u201311 are deliberately kept at Medium/Low to preserve a real prioritization signal \u2014 if time is cut, cases in items 9\u201311 are cut first, then item 8, then item 6/7, before any High-risk case is dropped.\n\n### 4. Entry & Exit Criteria\n\n**Entry criteria (testing can begin when):**\n- Build deploys cleanly to staging.\n- Staging is connected to the aggregator's sandbox environment with at least 2\u20133 sandbox brokerage institutions available (to cover multi-broker variability).\n- Acceptance criteria exist (even in brief form) for account linking, holdings, transactions, and performance views.\n- Seeded sandbox test accounts exist with known, predictable holdings/transaction data (see Test Data below).\n\n**Exit criteria (test effort is done when):**\n- 100% of High-risk test cases executed with a Pass result (or explicitly waived with sign-off per the skill's override policy).\n- No open Critical or High-severity defects; any exceptions have documented, approved waivers.\n- Financial calculations (returns, gain/loss, holdings value) independently verified against a hand-calculated or spreadsheet-derived expected value for every seeded test account.\n- Account-linking security cases (session isolation, token handling, no cross-account leakage) pass with no exceptions \u2014 this category is not eligible for waiver given impact severity.\n- Medium-risk cases at least 90% executed and passing; Low-risk cases smoke-tested.\n- Production post-deploy smoke test passes (login, view real linked account, view holdings/returns without error).\n\n### 5. Test Environments & Data\n\n- **Environments:**\n  - *Local/dev*: unit and integration tests, run by developers, on every commit.\n  - *Staging*: full manual E2E test execution, connected to the brokerage aggregator's **sandbox** mode (not live institutions) so tests are deterministic and don't touch real financial accounts.\n  - *Production*: smoke test only, post-deploy, using one real (team-owned, consented) linked test account with minimal real holdings.\n- **Test data strategy:**\n  - Use the aggregator's sandbox test institutions/credentials (most aggregators \u2014 Plaid, MX, Finicity, Yodlee \u2014 provide these) to simulate: normal accounts, accounts with large transaction histories, accounts with zero holdings, accounts that fail to link, and accounts that require re-authentication (expired credentials).\n  - Seed at least one sandbox account with a **known, hand-verifiable** set of transactions and holdings so expected performance/return values can be calculated independently and compared against the app's output.\n  - No real user PII or real account credentials are used in staging under any circumstance.\n  - Data reset: sandbox accounts should be re-seedable/resettable between test cycles so tests are repeatable; note in each test case if it mutates state (e.g., unlinking) and needs a reset afterward.\n- **Environment quirks to account for:** aggregator sandbox sync can be slower/faster than production and may have simulated failure modes (feature-flaggable) \u2014 testers should know how to trigger \"link failure,\" \"requires re-auth,\" and \"sync delay\" scenarios in sandbox specifically.\n\n### 6. Tooling\n\n- **Test case management:** Spreadsheet/markdown-based tracking for this release (team size doesn't justify a dedicated TCM tool yet); this document plus a traceability matrix (below) is the source of truth. Revisit if the team or scope grows.\n- **Automation framework:** Not decided in this document \u2014 deferred to Phase 2 (Automation Planning) per the skill's phase model. Constraint to note now: whatever E2E framework is chosen must be able to handle the third-party aggregator's OAuth/credential-handoff redirect flow (this rules out some simpler DOM-only tools and favors something with full browser control, e.g., Playwright).\n- **Defect tracker:** Assumed to be whatever issue tracker the team already uses (e.g., GitHub Issues, Jira). Severity defined as: **Critical** (data loss, security breach, wrong financial numbers shown, app unusable), **High** (major feature broken, no workaround), **Medium** (feature impaired, workaround exists), **Low** (cosmetic/minor usability).\n\n### 7. Roles & Responsibilities\n\nSmall-team assumption \u2014 flagged explicitly rather than left implied:\n\n| Role | Responsibility | Assumed Owner |\n|---|---|---|\n| Test strategy & risk register | This document | Test Lead |\n| Manual test case authoring | Phase 1 below | Test Lead |\n| Test case review | Reviews test cases for gaps/technical accuracy | 1 Developer + 1 Product Owner (each reviews a pass) |\n| Manual test execution | Runs test cases pre-release | Test Lead (+ developers for integration-level checks) |\n| Automation build | Deferred to Phase 2 | Developers, with Test Lead defining what/priority |\n| Defect triage & severity call | Classifies and prioritizes defects found | Test Lead proposes, Product Owner + Eng Lead confirm Critical/High calls |\n| Go/No-Go authority | Final release decision | Product Owner + Eng Lead, informed by Test Lead's report |\n\n### Phase 0 Deliverables Checklist\n\n- [x] Scope (in and out) documented\n- [x] Applicable test levels identified\n- [x] Risk register produced with features/modules ranked High/Medium/Low\n- [x] Entry and exit criteria defined\n- [x] Test environment and test data strategy defined\n- [x] Tooling decided (test management, automation, defect tracking)\n- [x] Roles and responsibilities assigned\n\n---\n\n## Phase 1 \u2014 Test Design (Manual Test Cases)\n\nCases are grouped by feature area and ordered by risk tier within each area (High-risk areas get the deepest edge-case coverage, per the strategy above). IDs use `TC-<module>-<number>`.\n\n### Traceability Matrix\n\n| Requirement / AC ID | Test Case ID(s) | Risk Tier | Status |\n|---|---|---|---|\n| REQ-LINK-01: User can link a brokerage account | TC-LINK-01, TC-LINK-02, TC-LINK-03 | High | Written |\n| REQ-LINK-02: Linking fails gracefully | TC-LINK-04, TC-LINK-05, TC-LINK-06 | High | Written |\n| REQ-LINK-03: Expired/revoked link requires re-auth | TC-LINK-07, TC-LINK-08 | High | Written |\n| REQ-LINK-04: User can unlink an account | TC-LINK-09, TC-LINK-10 | Medium | Written |\n| REQ-SEC-01: Session and data isolation between users | TC-SEC-01, TC-SEC-02, TC-SEC-03 | High | Written |\n| REQ-SEC-02: Credentials/tokens not exposed | TC-SEC-04, TC-SEC-05 | High | Written |\n| REQ-HOLD-01: Holdings display accurately | TC-HOLD-01, TC-HOLD-02, TC-HOLD-03 | High | Written |\n| REQ-HOLD-02: Holdings handle edge quantities/values | TC-HOLD-04, TC-HOLD-05, TC-HOLD-06 | High | Written |\n| REQ-HOLD-03: Multi-account holdings aggregation | TC-HOLD-07 | Medium | Written |\n| REQ-TXN-01: Transaction history displays accurately | TC-TXN-01, TC-TXN-02, TC-TXN-03 | High | Written |\n| REQ-TXN-02: Transaction history handles volume/pagination | TC-TXN-04, TC-TXN-05 | High | Written |\n| REQ-TXN-03: Filtering and sorting transactions | TC-TXN-06, TC-TXN-07 | Medium | Written |\n| REQ-PERF-01: Returns/performance calculated correctly | TC-PERF-01, TC-PERF-02, TC-PERF-03 | High | Written |\n| REQ-PERF-02: Performance across time ranges | TC-PERF-04, TC-PERF-05 | High | Written |\n| REQ-PERF-03: Performance edge cases (new account, zero activity) | TC-PERF-06, TC-PERF-07 | High | Written |\n| REQ-SYNC-01: Manual refresh / stale data indication | TC-SYNC-01, TC-SYNC-02 | Medium | Written |\n| REQ-UX-01: Empty/onboarding states | TC-UX-01 | Low | Written |\n| REQ-A11Y-01: Keyboard/screen-reader access to core flows | TC-A11Y-01, TC-A11Y-02 | Medium | Written |\n\n---\n\n### A. Account Linking (High Risk)\n\n```text\nID: TC-LINK-01\nTitle: Successfully link a brokerage account with valid sandbox credentials\nPriority: High\nPreconditions: User is logged in; no accounts currently linked; aggregator sandbox available\nSteps:\n  1. Navigate to \"Link Account\" / \"Add Brokerage Account\"\n  2. Select a sandbox institution from the list\n  3. Enter valid sandbox credentials in the aggregator's connection flow\n  4. Complete any MFA/verification step presented by the sandbox flow\n  5. Return to the app after the aggregator flow completes\nExpected Result: Account appears in the user's linked accounts list with status \"Connected\"; initial data sync begins or completes; user is returned to a sensible in-app screen (not an error page)\nTest Data: Sandbox institution \"Test Bank A\" with known credentials from aggregator sandbox docs\n```\n\n```text\nID: TC-LINK-02\nTitle: Link a second brokerage account from a different institution\nPriority: High\nPreconditions: User already has one account linked (from TC-LINK-01)\nSteps:\n  1. Initiate \"Add another account\" flow\n  2. Select a different sandbox institution\n  3. Complete the connection flow\nExpected Result: Both accounts appear in the linked accounts list, independently; data from account 1 is unaffected\nTest Data: Sandbox institution \"Test Bank B\"\n```\n\n```text\nID: TC-LINK-03\nTitle: Link flow is abandoned/cancelled by user mid-flow\nPriority: High\nPreconditions: User is logged in, in the middle of the linking flow at the aggregator's UI\nSteps:\n  1. Start the link flow\n  2. Close/cancel the aggregator popup or navigate back before completing\nExpected Result: App returns to a clean state with no partial/broken account entry created; user can retry linking without needing to reload or re-login\nTest Data: N/A\n```\n\n```text\nID: TC-LINK-04\nTitle: Linking fails due to invalid credentials\nPriority: High\nPreconditions: User is logged in, on the link flow\nSteps:\n  1. Select a sandbox institution\n  2. Enter intentionally invalid credentials (per aggregator sandbox's documented failure-simulation values)\nExpected Result: Aggregator/app shows a clear, user-understandable error; no broken/half-linked account is created; user can retry\nTest Data: Aggregator sandbox's designated \"invalid credentials\" test values\n```\n\n```text\nID: TC-LINK-05\nTitle: Linking fails due to institution/aggregator outage (simulated)\nPriority: High\nPreconditions: Aggregator sandbox supports simulating an institution-down response\nSteps:\n  1. Trigger the simulated outage condition per aggregator sandbox docs\n  2. Attempt to link an account against that institution\nExpected Result: App shows a clear \"service temporarily unavailable, try again later\" message; does not show a generic crash/error page; does not silently fail with no feedback\nTest Data: Aggregator sandbox outage-simulation institution\n```\n\n```text\nID: TC-LINK-06\nTitle: Linking fails due to network interruption mid-flow\nPriority: High\nPreconditions: User is mid-linking-flow\nSteps:\n  1. Start link flow, reach the credential submission step\n  2. Simulate network loss (disable network / throttle to offline) before flow completes\n  3. Restore network\nExpected Result: App detects the failure state and shows an appropriate error/retry option rather than hanging indefinitely; no partial account created\nTest Data: N/A (network condition simulated via dev tools/proxy)\n```\n\n```text\nID: TC-LINK-07\nTitle: Previously linked account shows \"requires re-authentication\" when credentials expire/are revoked\nPriority: High\nPreconditions: An account is linked; aggregator sandbox supports forcing an \"item login required\" state\nSteps:\n  1. Trigger the sandbox's expired/revoked credential state for the linked account\n  2. Load the app's dashboard or linked accounts page\nExpected Result: Affected account is clearly flagged (e.g., \"Reconnect required\") rather than silently showing stale data as if current; other linked accounts are unaffected\nTest Data: Aggregator sandbox re-auth-required simulation\n```\n\n```text\nID: TC-LINK-08\nTitle: User successfully re-authenticates an expired link\nPriority: High\nPreconditions: Account is in \"requires re-authentication\" state (from TC-LINK-07)\nSteps:\n  1. Click \"Reconnect\" / \"Fix connection\" on the flagged account\n  2. Complete the aggregator's re-auth flow with valid sandbox credentials\nExpected Result: Account status returns to \"Connected\"; historical data is preserved (not wiped/duplicated); sync resumes\nTest Data: Same sandbox institution, valid credentials\n```\n\n```text\nID: TC-LINK-09\nTitle: User unlinks/removes a brokerage account\nPriority: Medium\nPreconditions: At least one account is linked\nSteps:\n  1. Navigate to account settings for a linked account\n  2. Select \"Remove\" / \"Unlink account\"\n  3. Confirm the action (assume a confirmation step exists given the destructive nature)\nExpected Result: Account is removed from the linked accounts list; associated holdings/transactions no longer appear in aggregate views; underlying access token is revoked with the aggregator (verify via aggregator sandbox dashboard/logs if accessible)\nTest Data: A linked sandbox account dedicated to deletion testing (so it doesn't affect other test cases' data)\n```\n\n```text\nID: TC-LINK-10\nTitle: Unlinking one account does not affect other linked accounts' data\nPriority: Medium\nPreconditions: Two or more accounts linked\nSteps:\n  1. Unlink one account\n  2. View holdings, transactions, and performance for the remaining account(s)\nExpected Result: Remaining account's data is complete and unchanged; no orphaned references to the removed account (e.g., in aggregate totals) remain\nTest Data: Two sandbox accounts with distinct, known holdings\n```\n\n### B. Security & Session Isolation (High Risk)\n\n```text\nID: TC-SEC-01\nTitle: User A cannot view User B's linked accounts or financial data\nPriority: High\nPreconditions: Two distinct user accounts (User A, User B) each with their own linked brokerage accounts\nSteps:\n  1. Log in as User A, note account/holdings identifiers (IDs, URLs) shown\n  2. Log out; log in as User B\n  3. Attempt to access User A's account/holdings data directly via URL manipulation (e.g., changing an account ID in the URL) if such direct-access URLs exist\nExpected Result: User B receives an authorization error (403/404-equivalent) and cannot view any of User A's data under any circumstance\nTest Data: Two separate test user accounts, each with a distinct linked sandbox brokerage account\n```\n\n```text\nID: TC-SEC-02\nTitle: Session expires and requires re-login after inactivity/timeout\nPriority: High\nPreconditions: User logged in; session timeout policy known (assumed to exist; confirm actual timeout value with dev team)\nSteps:\n  1. Log in, leave session idle past the configured timeout\n  2. Attempt to view holdings/transactions\nExpected Result: User is prompted to re-authenticate; no financial data is rendered without a valid session\nTest Data: N/A\n```\n\n```text\nID: TC-SEC-03\nTitle: Logging out clears session and prevents back-navigation data exposure\nPriority: High\nPreconditions: User logged in, has viewed holdings/transactions\nSteps:\n  1. Log out\n  2. Use browser back button to attempt to return to a previously viewed holdings/transactions page\nExpected Result: App redirects to login / does not display cached financial data; no sensitive data visible without re-authentication\nTest Data: N/A\n```\n\n```text\nID: TC-SEC-04\nTitle: Brokerage credentials are never handled or stored by our application directly\nPriority: High\nPreconditions: Access to network traffic inspection (dev tools) during a link flow\nSteps:\n  1. Initiate account linking\n  2. Inspect network requests during credential entry\nExpected Result: Credentials are transmitted directly to the aggregator's domain, not to our application's backend; our backend only ever receives a token/public token, never raw broker credentials\nTest Data: N/A (inspection-based test)\n```\n\n```text\nID: TC-SEC-05\nTitle: Access tokens/secrets are not exposed in client-side code, logs, or browser storage in plaintext\nPriority: High\nPreconditions: Account linked; access to dev tools\nSteps:\n  1. Inspect browser local storage, session storage, and cookies after linking\n  2. Inspect any client-visible network responses for token values\nExpected Result: No long-lived aggregator access token or secret is stored in plaintext in client-accessible storage; any token present is appropriately scoped/short-lived or absent from the client entirely\nTest Data: N/A (inspection-based test)\n```\n\n### C. Holdings View (High Risk)\n\n```text\nID: TC-HOLD-01\nTitle: Holdings list matches known sandbox account positions\nPriority: High\nPreconditions: Sandbox account with a known, pre-verified set of positions is linked\nSteps:\n  1. Navigate to Holdings view\n  2. Compare displayed positions (symbol, quantity, current price, market value) against the known sandbox data\nExpected Result: All positions match exactly \u2014 no missing, extra, or misvalued holdings\nTest Data: Seeded sandbox account \"known-holdings-01\" with documented expected values\n```\n\n```text\nID: TC-HOLD-02\nTitle: Holdings values update after a data refresh/sync\nPriority: High\nPreconditions: Account linked; sandbox supports simulating a price/quantity change between syncs\nSteps:\n  1. Note current holdings values\n  2. Trigger a change in sandbox data (or wait for scheduled sync if simulation isn't available) and force a refresh in-app\nExpected Result: Updated values are reflected accurately; no stale values persist after refresh completes\nTest Data: Sandbox account with simulate-able data change\n```\n\n```text\nID: TC-HOLD-03\nTitle: Cost basis and unrealized gain/loss display correctly (if in scope for v1)\nPriority: High\nPreconditions: Seeded account with known cost basis per position\nSteps:\n  1. View a position's detail\n  2. Compare displayed cost basis and unrealized gain/loss against hand-calculated expected values\nExpected Result: Values match expected calculation (market value \u2212 cost basis); gain/loss sign (positive/negative) and formatting (color, +/-) are correct\nTest Data: Seeded sandbox account with known purchase prices\n```\n\n```text\nID: TC-HOLD-04\nTitle: Holdings view handles an account with zero positions\nPriority: High\nPreconditions: A linked sandbox account with no current holdings (e.g., fully liquidated)\nSteps:\n  1. View Holdings for this account\nExpected Result: A clear empty state is shown (\"No holdings found\") rather than a blank screen, error, or loading spinner that never resolves\nTest Data: Sandbox account with zero positions\n```\n\n```text\nID: TC-HOLD-05\nTitle: Holdings view handles a very large number of positions\nPriority: High\nPreconditions: Sandbox account (or simulated data) with a large number of distinct positions (e.g., 100+)\nSteps:\n  1. View Holdings for this account\nExpected Result: All positions load (paginated or scrollable as designed); no truncation, timeout, or performance degradation that blocks usability\nTest Data: Sandbox/synthetic account with 100+ positions\n```\n\n```text\nID: TC-HOLD-06\nTitle: Holdings view handles fractional shares and very small/large quantities correctly\nPriority: High\nPreconditions: Seeded account with a fractional-share position (e.g., 0.0001 shares) and a very large quantity position\nSteps:\n  1. View Holdings\n  2. Check displayed quantity and computed market value for both edge positions\nExpected Result: Fractional and large quantities display with correct precision (no silent rounding that changes computed value); market value math remains accurate\nTest Data: Seeded position with fractional shares; seeded position with large quantity (e.g., 100,000 shares)\n```\n\n```text\nID: TC-HOLD-07\nTitle: Aggregate holdings view correctly sums positions across multiple linked accounts\nPriority: Medium\nPreconditions: Two+ accounts linked, each with known holdings, including an overlapping symbol held in both\nSteps:\n  1. View the combined/aggregate holdings view (if the app offers a cross-account rollup)\nExpected Result: Overlapping symbol is correctly summed (or clearly shown per-account, per design); total portfolio value equals the sum of both accounts' verified values\nTest Data: Two sandbox accounts, one shared symbol held in both\n```\n\n### D. Transaction History (High Risk)\n\n```text\nID: TC-TXN-01\nTitle: Transaction history matches known sandbox account activity\nPriority: High\nPreconditions: Seeded sandbox account with a known list of transactions (buys, sells, dividends)\nSteps:\n  1. Navigate to Transaction History\n  2. Compare each transaction (date, type, symbol, quantity, price, amount) against the known expected list\nExpected Result: All transactions present, none missing or duplicated, all fields accurate\nTest Data: Seeded sandbox account \"known-transactions-01\"\n```\n\n```text\nID: TC-TXN-02\nTitle: Transaction history includes non-trade activity (dividends, transfers, fees) if in scope\nPriority: High\nPreconditions: Seeded account with a dividend and/or transfer event\nSteps:\n  1. View Transaction History\nExpected Result: Non-trade activity types display with correct labeling and amounts, distinguishable from buy/sell trades\nTest Data: Seeded dividend/transfer event\n```\n\n```text\nID: TC-TXN-03\nTitle: Transaction detail view shows accurate, complete information for a single transaction\nPriority: High\nPreconditions: A known transaction exists\nSteps:\n  1. Click into a single transaction's detail view\nExpected Result: All fields (date, settlement date if shown, price, quantity, fees, total) match expected values with no truncation or mislabeling\nTest Data: Single known transaction record\n```\n\n```text\nID: TC-TXN-04\nTitle: Transaction history handles a large volume of transactions (pagination/infinite scroll)\nPriority: High\nPreconditions: Seeded/synthetic account with a large transaction count (e.g., 500+)\nSteps:\n  1. Load Transaction History\n  2. Scroll/paginate through the full list\nExpected Result: All transactions are reachable, no duplicates or gaps introduced by pagination, performance remains acceptable (no multi-second freezes)\nTest Data: Synthetic account with 500+ transactions\n```\n\n```text\nID: TC-TXN-05\nTitle: New transactions appear after a sync following the initial link\nPriority: High\nPreconditions: Account already linked and synced once\nSteps:\n  1. Simulate a new transaction occurring in the sandbox account\n  2. Trigger a sync/refresh\nExpected Result: New transaction appears in history without duplicating previously synced transactions\nTest Data: Sandbox account supporting incremental transaction simulation\n```\n\n```text\nID: TC-TXN-06\nTitle: Filtering transaction history by type/date range works correctly\nPriority: Medium\nPreconditions: Account with a mix of transaction types across multiple dates\nSteps:\n  1. Apply a filter for a specific transaction type (e.g., \"Dividends only\")\n  2. Apply a date range filter\nExpected Result: Only matching transactions display; filters can be combined and cleared without stale results lingering\nTest Data: Mixed transaction dataset spanning several months and types\n```\n\n```text\nID: TC-TXN-07\nTitle: Sorting transaction history by date/amount works correctly\nPriority: Medium\nPreconditions: Account with multiple transactions of varying dates/amounts\nSteps:\n  1. Sort by date ascending/descending\n  2. Sort by amount ascending/descending\nExpected Result: Sort order is correct and stable; no transactions dropped when re-sorting\nTest Data: Mixed transaction dataset\n```\n\n### E. Performance & Returns (High Risk)\n\n```text\nID: TC-PERF-01\nTitle: Total return percentage matches hand-calculated expected value for a known account\nPriority: High\nPreconditions: Seeded account with fully known transaction and price history sufficient to hand-calculate expected return\nSteps:\n  1. Independently calculate expected return (e.g., simple return or time-weighted return, per whatever methodology the app documents) using spreadsheet/manual math\n  2. View the app's displayed return for the same account/period\nExpected Result: App's displayed value matches the independently calculated value within an agreed rounding tolerance (e.g., 0.01%)\nTest Data: Seeded account \"known-performance-01\" with documented calculation worksheet\n```\n\n```text\nID: TC-PERF-02\nTitle: Gain/loss (dollar amount) matches hand-calculated expected value\nPriority: High\nPreconditions: Same seeded account as TC-PERF-01\nSteps:\n  1. Compare app's displayed $ gain/loss against independently calculated expected value\nExpected Result: Values match within rounding tolerance; sign (gain vs. loss) is correct\nTest Data: Same as TC-PERF-01\n```\n\n```text\nID: TC-PERF-03\nTitle: Performance calculation correctly accounts for deposits/withdrawals (cash flow), not just price movement\nPriority: High\nPreconditions: Seeded account with a mid-period deposit or withdrawal event\nSteps:\n  1. Calculate expected return using a method that correctly excludes cash-flow timing distortion (e.g., time-weighted return) if that's the app's documented methodology\n  2. Compare against app's displayed return\nExpected Result: App's return figure is not distorted by the deposit/withdrawal (i.e., it doesn't misrepresent a cash injection as investment gain, or vice versa)\nTest Data: Seeded account with a documented mid-period cash flow event\n```\n\n```text\nID: TC-PERF-04\nTitle: Performance displays correctly across all supported time ranges\nPriority: High\nPreconditions: Seeded account with sufficient history to cover all offered ranges (e.g., 1M, YTD, 1Y, All)\nSteps:\n  1. Select each time range option in turn\n  2. Verify the return/gain-loss figure updates and matches the expected value for that specific range\nExpected Result: Each range shows a distinct, correct value scoped to that period only; switching ranges doesn't leave stale data from a previous selection\nTest Data: Seeded account with multi-year history\n```\n\n```text\nID: TC-PERF-05\nTitle: Performance chart (if present) reflects the same data as the numeric summary\nPriority: High\nPreconditions: Seeded account with known performance history\nSteps:\n  1. Compare the chart's start/end values and general trend against the numeric performance summary shown alongside it\nExpected Result: Chart and numeric summary are consistent with each other (no case where the chart shows a gain but the number shows a loss, or similar contradiction)\nTest Data: Same seeded account\n```\n\n```text\nID: TC-PERF-06\nTitle: Performance view handles a brand-new account with no price history yet\nPriority: High\nPreconditions: Newly linked account, first sync just completed, insufficient history for a return calculation\nSteps:\n  1. View Performance for this account immediately after linking\nExpected Result: App shows an appropriate \"not enough data yet\" state rather than a misleading 0%, error, or NaN/undefined value\nTest Data: Freshly linked sandbox account\n```\n\n```text\nID: TC-PERF-07\nTitle: Performance view handles an account with zero net gain/loss (flat performance)\nPriority: High\nPreconditions: Seeded account engineered to have exactly flat performance over the test period\nSteps:\n  1. View Performance for this account\nExpected Result: Displays 0.00% / $0.00 correctly formatted, not blank, not an error, correct neutral styling (not colored as a gain or loss)\nTest Data: Seeded account with flat performance\n```\n\n### F. Sync / Refresh Behavior (Medium Risk)\n\n```text\nID: TC-SYNC-01\nTitle: Manual refresh updates data and shows a loading/progress indicator\nPriority: Medium\nPreconditions: Account linked\nSteps:\n  1. Trigger a manual refresh\nExpected Result: A loading indicator is shown during sync; data updates on completion; no duplicate data created by repeated syncs\nTest Data: N/A\n```\n\n```text\nID: TC-SYNC-02\nTitle: Stale data is indicated to the user when a sync fails or hasn't run recently\nPriority: Medium\nPreconditions: Simulate a sync failure or an account that hasn't synced in an extended period\nSteps:\n  1. View the account/holdings after a failed or overdue sync\nExpected Result: A \"last updated\" timestamp or stale-data indicator is visible so the user isn't misled into thinking the data is current\nTest Data: Sandbox account with simulated sync failure\n```\n\n### G. Usability / Empty States (Low Risk)\n\n```text\nID: TC-UX-01\nTitle: New user with no linked accounts sees a clear onboarding/empty state\nPriority: Low\nPreconditions: Newly registered user, no accounts linked\nSteps:\n  1. Log in for the first time\n  2. View the dashboard/holdings/transactions/performance pages\nExpected Result: Each page shows a clear call-to-action to link an account rather than a blank or broken page\nTest Data: Fresh test user account\n```\n\n### H. Accessibility (Medium Risk, Baseline)\n\n```text\nID: TC-A11Y-01\nTitle: Core flows (link account, view holdings, view performance) are keyboard-navigable\nPriority: Medium\nPreconditions: None\nSteps:\n  1. Using only keyboard (Tab/Shift+Tab/Enter/Space), complete: initiating account link, navigating to Holdings, navigating to Performance\nExpected Result: All interactive elements are reachable and operable via keyboard; focus order is logical; focus is visible\nTest Data: N/A\n```\n\n```text\nID: TC-A11Y-02\nTitle: Screen reader announces key financial figures meaningfully\nPriority: Medium\nPreconditions: Screen reader enabled (e.g., NVDA/VoiceOver)\nSteps:\n  1. Navigate to Holdings and Performance views with a screen reader active\n  2. Listen to how values (position values, return %, gain/loss) are announced\nExpected Result: Values are announced with sufficient context (e.g., \"AAPL, 10 shares, $1,500 market value\") rather than bare unlabeled numbers; positive/negative performance isn't conveyed by color alone\nTest Data: N/A\n```\n\n---\n\n### Test Data Requirements Summary\n\n| Test Data Set | Used By | Description |\n|---|---|---|\n| `known-holdings-01` | TC-HOLD-01\u201303, TC-PERF-01\u201303 | Sandbox account with fully documented positions, cost basis, and transaction history enabling independent hand-calculation of expected values |\n| `known-transactions-01` | TC-TXN-01\u201303 | Sandbox account with a documented, itemized transaction list |\n| Zero-position account | TC-HOLD-04, TC-PERF-06 | Sandbox account with no current holdings / freshly linked |\n| High-volume account | TC-HOLD-05, TC-TXN-04 | Synthetic account with 100+ positions / 500+ transactions |\n| Fractional/large-quantity account | TC-HOLD-06 | Seeded position with fractional and very large share counts |\n| Flat-performance account | TC-PERF-07 | Engineered to have exactly 0% return over the test window |\n| Multi-account pair (overlapping symbol) | TC-HOLD-07, TC-LINK-02, TC-LINK-10 | Two sandbox accounts, one shared ticker |\n| Two distinct user accounts | TC-SEC-01 | For cross-user isolation testing |\n| Invalid-credential / outage / re-auth-required sandbox states | TC-LINK-04, 05, 07 | Aggregator sandbox's documented failure-simulation values |\n\nAll sandbox data must be resettable between test cycles; test cases that mutate state (TC-LINK-09, TC-LINK-10) should use dedicated accounts not shared with read-only verification cases.\n\n### Phase 1 Deliverables Checklist\n\n- [x] Manual test cases written for all Must-Have acceptance criteria (Account Linking, Holdings, Transactions, Performance, Security)\n- [x] Traceability matrix complete (see above) \u2014 18 requirements mapped to 38 test cases\n- [x] Edge cases and negative scenarios identified, weighted toward High-risk areas (linking failures, security isolation, calculation edge cases, volume/boundary cases concentrated in Sections A\u2013E)\n- [x] Test data requirements documented (see Test Data Requirements Summary)\n- [ ] Test cases reviewed by at least one other person \u2014 **not yet done; this is a generated first draft.** Recommend a developer pass (for technical accuracy on sync/token handling cases) and a product owner pass (for correctness of expected results on performance/returns cases) before these are marked execution-ready.\n\n---\n\n## Gap Called Out for the Record\n\nPer the skill's gate rules, **Gate 1 (Design \u2192 Automation Planning) is not yet fully met** \u2014 everything is satisfied except the peer/dev/product review step, which requires a human reviewer and cannot be completed in this non-interactive run. Recommend scheduling that review before moving to Phase 2 (Automation Planning).\n\n## Suggested Next Steps\n\n1. Route this document to one developer and one product owner for the required Phase 1 review.\n2. Confirm the assumptions stated at the top (aggregator choice, read-only v1 scope, currency/locale) with the actual product owner \u2014 several test cases (e.g., TC-HOLD-03 cost basis) depend on whether those features are actually in v1 scope.\n3. Once reviewed, proceed to Phase 2 (Automation Planning) to decide test pyramid targets and which of these 38 manual cases become automated regression coverage versus stay manual/exploratory.\n"}], "grading": {"expectations": [{"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list", "passed": true, "evidence": "Section 3, 'Risk-Based Prioritization' table ranks 11 items by Likelihood x Impact into High/Medium/Low tiers with rationale, and explicitly checks its own distribution ('5 of 11 items (~45%) are High...')."}, {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions", "passed": true, "evidence": "38 test cases (TC-LINK-01 through TC-A11Y-02) each formatted as ID/Title/Priority/Preconditions/Steps/Expected Result/Test Data code blocks."}, {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials", "passed": true, "evidence": "Risk table row #1 ranks 'Account linking' High, and Section B is a dedicated 'Security & Session Isolation (High Risk)' group with 5 cases."}, {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data", "passed": true, "evidence": "Risk table row #2 ranks 'Performance & returns calculations' High ('Silent calculation errors are the single most damaging bug class...'); Section E has 7 dedicated cases including hand-calculated verification (TC-PERF-01, 02)."}, {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases", "passed": true, "evidence": "Section 4 'Entry & Exit Criteria' lists 4 entry conditions and 6 exit conditions including waiver rules for financial calculation cases."}, {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)", "passed": true, "evidence": "TC-LINK-04/05/06 (invalid creds, outage, network loss), TC-HOLD-04/05/06 (zero positions, large volume, fractional shares), TC-PERF-06/07 (no history, flat performance) are all explicit negative/edge cases."}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}, "timing": {"total_duration_seconds": 163.3}, "eval_feedback": {"overall": "This eval is not discriminating on its own -- the without_skill baseline also passes all 6 assertions with comparable structure and depth, because a well-known domain (risk-based test strategy for a fintech app) is within general model knowledge. The differentiator here isn't presence/absence of these elements but process rigor: with_skill explicitly labels its work as 'Phase 0'/'Phase 1', maintains a live deliverables checklist, and proactively calls out that Gate 1 (peer review) is unmet and blocks progression -- none of which the baseline does since it has no concept of gates. Consider adding an assertion that checks for this gate-awareness/checklist behavior specifically, since that's the actual skill-specific value being tested here."}}}, {"id": "strategy-design-without_skill", "prompt": "We're getting our portfolio management web app ready for its first release. Users link brokerage accounts, view holdings, see transaction history, and track performance/returns. Help me build a test strategy and write manual test cases, prioritized by risk, across the core areas.", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# Test Strategy & Manual Test Cases \u2014 Portfolio Management Web App (v1.0 Release)\n\n## Document Assumptions\n\nSince this is a first release, I'm making the following assumptions to scope the strategy concretely. Adjust if any don't match reality:\n\n1. **Core features in scope**: (a) brokerage account linking (likely via an aggregator like Plaid), (b) holdings view, (c) transaction history, (d) performance/returns tracking (e.g., time-weighted or money-weighted return, gain/loss).\n2. Account linking uses a third-party aggregator (OAuth-style flow) rather than users manually entering brokerage credentials directly into our app.\n3. Data is refreshed periodically (scheduled sync) and/or on-demand (\"refresh\" action), not necessarily real-time streaming.\n4. The app displays real financial data \u2014 even \"view only\" \u2014 so correctness and data integrity are release blockers, not cosmetic bugs.\n5. Multi-currency, tax-lot accounting, and multi-user/shared portfolios may or may not be in v1 \u2014 flagged as open questions where relevant.\n6. Supported platforms: responsive web app, modern evergreen browsers (Chrome, Safari, Edge, Firefox), desktop + mobile web.\n7. There is no in-app trading/order execution in v1 (view/track only) \u2014 if this assumption is wrong, a whole additional risk category (trade execution) needs its own strategy.\n\n---\n\n## 1. Test Strategy\n\n### 1.1 Objective\n\nEnsure the app presents **accurate, trustworthy financial data** and a **secure, reliable account-linking experience** before first release. For a finance product, correctness and trust are the product \u2014 a single wrong balance or duplicated transaction can destroy user confidence permanently, even if the UI is polished.\n\n### 1.2 Guiding Principle: Risk-Based Prioritization\n\nTesting effort is allocated by **(likelihood of failure) \u00d7 (impact of failure)**, not by feature size. Impact is weighted heavily toward:\n- **Financial data correctness** (wrong numbers are worse than missing features)\n- **Security/privacy of financial credentials and account data**\n- **Data integrity across sync/refresh cycles** (duplication, loss, staleness)\n\nA bug that shows a wrong account balance is P0 even if it's visually tiny. A bug that misaligns a button is P3 even if it's visually obvious.\n\n### 1.3 Risk Assessment by Core Area\n\n| # | Area | Key Risks | Risk Level |\n|---|------|-----------|------------|\n| 1 | Account Linking | Credential/token leakage, failed/partial links leaving orphaned state, wrong account linked, MFA flow breaking, re-auth after token expiry | **Critical** |\n| 2 | Holdings View | Wrong quantities/prices/valuations, stale data shown as current, missing asset classes, cost-basis errors | **Critical** |\n| 3 | Transaction History | Missing, duplicated, or miscategorized transactions; incorrect sign (buy vs. sell); pagination dropping rows; date/timezone errors | **High** |\n| 4 | Performance/Returns | Incorrect return calculation methodology, mixing time-weighted/money-weighted incorrectly, benchmark comparison errors, misleading charts | **High** |\n| 5 | Multi-Account Aggregation | Double-counting holdings across linked accounts, currency mismatches, incorrect net worth roll-up | **High** |\n| 6 | Data Sync/Refresh | Sync failures silently shown as success, race conditions on concurrent refresh, unbounded retry storms hitting broker rate limits | **Medium-High** |\n| 7 | Security & Privacy | Session hijacking, data exposure to wrong user (multi-tenant leakage), insufficient logout/token revocation, PII in logs | **Critical** |\n| 8 | Authentication & Authorization | Login bypass, weak password/session policy, unauthorized access to another user's portfolio via IDOR | **Critical** |\n| 9 | Performance/Scalability | Slow load with large portfolios (1000+ transactions), timeouts on holdings refresh | Medium |\n| 10 | Cross-Browser/Responsive UI | Broken layouts hiding critical numbers, chart rendering failures | Medium |\n| 11 | Error Handling & Empty States | Confusing errors during broker outages, no guidance when zero accounts linked | Medium |\n| 12 | Notifications/Alerts (if in scope) | Missed or false alerts on large balance changes | Low-Medium |\n\n### 1.4 Test Levels & Types\n\n| Level/Type | Focus | Primarily Owned By |\n|---|---|---|\n| Unit tests | Return/gain-loss calculation formulas, cost-basis logic, currency conversion | Engineering |\n| Integration tests | Aggregator API contract, sync job idempotency, DB transaction integrity | Engineering + QA |\n| API/contract tests | Endpoints for holdings, transactions, performance \u2014 schema, auth, error codes | QA |\n| **Manual functional testing** (this document) | End-to-end user flows, edge cases, exploratory | QA |\n| Security testing | AuthN/AuthZ, IDOR, token storage, transport security, dependency scan | QA + Security review (recommend external pen test before GA) |\n| Data accuracy/reconciliation testing | Compare app numbers against source brokerage statements (golden datasets) | QA (critical, finance-specific) |\n| Performance/load testing | Large portfolios, concurrent sync jobs | Engineering + QA |\n| Cross-browser/responsive testing | Chrome, Safari, Firefox, Edge; mobile web breakpoints | QA |\n| Accessibility testing | Screen reader on holdings/transaction tables, color contrast (esp. red/green gain-loss) | QA |\n| Regression testing | Full P0/P1 suite before every release; automate over time | QA |\n| UAT / Beta | Internal dogfooding with real (or realistic sandbox) linked accounts before public launch | Product + QA |\n\n### 1.5 Test Environment Strategy\n\n- **Sandbox/test brokerage accounts**: Use aggregator's sandbox mode (e.g., Plaid Sandbox) with deterministic test institutions covering success, MFA-required, invalid-credential, and error scenarios.\n- **Seeded reference datasets**: Maintain a \"golden\" test account with known holdings/transactions/expected returns to validate calculations against a hand-computed answer key \u2014 re-run this every release as a smoke test.\n- **Broker outage simulation**: Mock aggregator responses for timeouts, 5xx errors, partial data, rate-limiting to test resilience without waiting for a real outage.\n- **Multi-user test accounts**: At least 2 separate user accounts to test data isolation (critical for security risk category).\n- **Data refresh timing control**: Ability to trigger/mock sync jobs on demand rather than waiting for real schedules.\n\n### 1.6 Entry / Exit Criteria\n\n**Entry criteria for test cycle:**\n- Feature-complete build deployed to staging\n- Aggregator sandbox integration functional\n- Test data/accounts provisioned\n\n**Exit criteria for release:**\n- 100% of Critical (P0) test cases pass\n- \u226595% of High (P1) test cases pass; no open P0/P1 defects\n- No known data-correctness defects of any severity affecting balances, returns, or transaction amounts\n- Security test cases (auth, data isolation, token handling) fully pass\n- Sign-off from Product + Eng on any deferred P2/P3 issues\n\n### 1.7 Defect Severity Definitions (finance-specific)\n\n| Severity | Definition | Example |\n|---|---|---|\n| S1 \u2013 Blocker | Wrong money numbers shown, security/data leak, cannot link any account | Balance off by $X, User A sees User B's portfolio |\n| S2 \u2013 Critical | Major flow broken but no wrong numbers shown | Refresh button fails silently, transaction list fails to paginate |\n| S3 \u2013 Major | Degraded but workable | Slow load, minor calculation edge case (e.g., dividends not included in return %) |\n| S4 \u2013 Minor | Cosmetic/UX | Misaligned column, non-blocking console warning |\n\n---\n\n## 2. Manual Test Cases (Prioritized by Risk)\n\nPriority key: **P0 = Critical/blocker**, **P1 = High**, **P2 = Medium**, **P3 = Low**\n\n### 2.1 Account Linking (P0 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| AL-01 | Successfully link a valid brokerage account | P0 | User logged in, no accounts linked | 1. Go to \"Link Account\" 2. Select supported broker 3. Enter valid sandbox credentials 4. Complete MFA if prompted 5. Confirm | Account appears in dashboard within expected sync time; status shows \"Connected\"; holdings begin populating |\n| AL-02 | Reject invalid credentials gracefully | P0 | User logged in | 1. Start link flow 2. Enter invalid credentials | Clear error message shown; no partial/orphaned account record created; user can retry |\n| AL-03 | Handle MFA-required broker flow | P0 | Broker sandbox configured for MFA | 1. Start link flow 2. Enter valid creds 3. Complete MFA challenge (SMS/OTP simulated) | Link completes successfully after MFA; no credential/OTP values logged or cached beyond session |\n| AL-04 | Cancel mid-link flow leaves no orphaned state | P1 | \u2014 | 1. Start link flow 2. Abandon at MFA step (close tab / click cancel) | No partial account, no duplicate entry on retry; user can restart cleanly |\n| AL-05 | Link second account from different institution | P1 | One account already linked | 1. Add second account from different broker | Both accounts listed independently; holdings/net worth aggregate correctly across both |\n| AL-06 | Prevent duplicate linking of same account | P1 | Account A already linked | 1. Attempt to link same account again | System detects duplicate and either blocks or merges gracefully; no doubled holdings/transactions |\n| AL-07 | Unlink/remove a linked account | P1 | Account linked | 1. Go to account settings 2. Remove/unlink account | Account and its data removed or archived per spec; access token revoked with aggregator (verify via API log, not just UI) |\n| AL-08 | Broker outage during initial link | P1 | Mock aggregator 5xx/timeout | 1. Attempt link while broker sandbox returns error | User sees actionable error (\"try again later\"), not a raw stack trace or infinite spinner |\n| AL-09 | Re-authentication after token expiry | P0 | Simulate expired access token for linked account | 1. Force token expiry 2. Trigger refresh/view holdings | App detects expired auth, prompts user to re-link/re-auth; does not show stale data silently as current |\n| AL-10 | Credentials are never stored/visible in our app | P0 | \u2014 | 1. Complete link flow 2. Inspect network requests, DB (if accessible), local storage, logs | Brokerage username/password never transmitted to or stored by our backend (only aggregator token); confirm via network trace |\n| AL-11 | Link flow works across supported browsers | P2 | \u2014 | Repeat AL-01 on Chrome, Safari, Firefox, Edge, mobile Safari/Chrome | Consistent success on all supported browsers |\n| AL-12 | Unsupported/unlisted institution search | P3 | \u2014 | 1. Search for a broker not in supported list | Clear \"not supported\" messaging, no crash |\n\n### 2.2 Security & Data Isolation (P0 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| SEC-01 | User A cannot view User B's portfolio via URL manipulation | P0 | Two separate test users, each with linked accounts | 1. Log in as User A 2. Note account/holding ID from URL or API call 3. Log in as User B 4. Attempt to access User A's ID directly (URL edit or API call) | Access denied (403/404); no data leakage |\n| SEC-02 | Session expires and protects data after logout | P0 | Logged-in session | 1. Log out 2. Use browser back button 3. Attempt to replay old API requests/tokens | No portfolio data accessible after logout; session/token invalidated server-side |\n| SEC-03 | Sensitive data not exposed in browser storage/logs | P0 | Linked account with data loaded | Inspect localStorage, sessionStorage, cookies, console logs, network payloads | No plaintext credentials, no unnecessary PII/account numbers exposed client-side beyond what's needed to render |\n| SEC-04 | Transport security enforced | P0 | \u2014 | Inspect all network calls | All traffic over HTTPS/TLS; no mixed content; API enforces auth headers |\n| SEC-05 | Account numbers masked appropriately in UI | P1 | Linked account | View account details | Full account number not displayed (e.g., shows last 4 digits only), consistent with industry norms |\n| SEC-06 | Password/auth brute-force protection | P1 | \u2014 | Attempt repeated failed logins | Rate limiting/lockout triggers after threshold; no user enumeration via error messages |\n| SEC-07 | Revoking account access via aggregator also revokes in-app | P1 | Linked account | 1. Revoke access from broker's side (simulated) 2. Refresh in app | App detects revocation, shows reconnect prompt, does not display last-known data as if current without indication |\n\n### 2.3 Holdings View (P0 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| HV-01 | Holdings match source brokerage exactly (golden dataset) | P0 | Golden test account with known holdings | 1. View holdings page | Quantities, current prices, market values, and total match hand-computed expected values exactly |\n| HV-02 | Holdings reflect real-time or clearly-timestamped prices | P0 | \u2014 | 1. View holdings 2. Note \"as of\" timestamp | Timestamp/staleness indicator shown; values not presented as live if they aren't |\n| HV-03 | Holdings aggregate correctly across multiple linked accounts | P1 | 2+ accounts holding same ticker | 1. View aggregated/net-worth holdings view | Quantities and values sum correctly without double-counting or omission |\n| HV-04 | Cost basis and unrealized gain/loss calculated correctly | P0 | Golden dataset with known cost basis | 1. View holding detail | Gain/loss $ and % match expected calculation (verify FIFO/avg-cost method matches documented methodology) |\n| HV-05 | Zero-holdings / empty portfolio state | P2 | New account, no holdings yet or fully liquidated | 1. View holdings | Friendly empty state, not a broken table or error |\n| HV-06 | Holdings view handles delisted/unsupported security gracefully | P2 | Account holding an obscure/delisted symbol | 1. View holdings | Shows symbol with \"price unavailable\" rather than $0 or crash (a $0 value could be misread as real data loss) |\n| HV-07 | Multi-currency holdings displayed/converted correctly (if in scope) | P1 | Account with non-USD holdings | 1. View holdings | Correct currency symbol and conversion rate/timestamp shown; totals converted consistently |\n| HV-08 | Sorting/filtering holdings table | P3 | Multiple holdings | 1. Sort by value, name, gain/loss 2. Filter by account/asset class | Sort and filter operate correctly without altering underlying values |\n| HV-09 | Large portfolio (500+ positions) loads within acceptable time | P2 | Seeded large dataset | 1. Load holdings page | Loads within defined SLA (e.g., <3s), pagination/virtualization works, no truncated data |\n\n### 2.4 Transaction History (P1 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| TX-01 | All transactions from source match exactly (golden dataset) | P0 | Golden account with known transaction list | 1. View transaction history | Every buy/sell/dividend/fee transaction present, correct date, amount, sign (debit/credit), and type |\n| TX-02 | No duplicate transactions after repeated sync/refresh | P0 | Linked account | 1. Trigger manual refresh multiple times in succession | Transaction count remains stable; no duplicates created |\n| TX-03 | New transactions appear after sync without gaps | P1 | Account with new activity since last sync | 1. Simulate new transaction at broker 2. Trigger sync | New transaction appears; no gap or missing entries around the sync boundary |\n| TX-04 | Transaction dates respect correct timezone | P1 | Transaction near midnight boundary | 1. Inspect transaction dated near UTC/local boundary | Date shown matches brokerage statement date, not shifted by timezone conversion bug |\n| TX-05 | Pagination does not drop or duplicate rows | P1 | Account with 100+ transactions | 1. Page through transaction history fully 2. Count total | Total matches expected count; no row appears on two pages or is skipped |\n| TX-06 | Transaction categorization (buy/sell/dividend/fee/transfer) correct | P1 | Golden dataset with varied transaction types | 1. View each transaction type | Category/label matches actual transaction type from broker |\n| TX-07 | Filtering by date range/account/type | P2 | Multiple transactions | 1. Apply date range filter 2. Apply account filter | Correct subset returned; totals recalculate correctly if summary shown |\n| TX-08 | Export transaction history (if supported) | P2 | \u2014 | 1. Export to CSV/PDF | Exported data matches on-screen data exactly |\n| TX-09 | Corrected/amended transactions from broker reflected correctly | P2 | Broker issues a correction (simulated) | 1. Sync after broker-side correction | App reflects corrected amount, not both old and new as separate entries |\n| TX-10 | Empty transaction history state | P3 | New account, no activity | 1. View transaction history | Friendly empty state message |\n\n### 2.5 Performance / Returns Tracking (P1 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| PF-01 | Overall portfolio return % matches golden dataset expected value | P0 | Golden dataset with hand-calculated expected return | 1. View performance/returns summary | Calculated return matches expected value within acceptable rounding tolerance; methodology (TWR vs MWR) documented and consistent |\n| PF-02 | Return calculation correctly accounts for deposits/withdrawals | P0 | Account with a mid-period cash deposit | 1. View return over period spanning the deposit | Return % is not artificially inflated/deflated by the cash flow (this is the single most common finance-app bug) |\n| PF-03 | Return calculation includes dividends/income, not just price change | P1 | Holding with dividend payout in period | 1. View return including dividend period | Total return includes dividend income, or clearly labels \"price return\" vs \"total return\" if only price is shown |\n| PF-04 | Performance chart renders correct trend matching underlying data | P1 | Golden dataset | 1. View performance chart over 1M/3M/1Y/YTD/All | Chart shape/endpoints match expected values at each data point; no gaps or flat-lining due to missing data treated as $0 |\n| PF-05 | Time period selector recalculates correctly | P1 | \u2014 | 1. Toggle between 1D/1W/1M/YTD/1Y/All | Values and chart update correctly for each period, no stale data left from previous selection |\n| PF-06 | Multi-account aggregate performance is weighted correctly | P1 | 2+ accounts of different sizes | 1. View combined performance | Aggregate return is value-weighted correctly, not a simple average of each account's % |\n| PF-07 | Negative returns/losses displayed clearly and correctly | P0 | Account with unrealized loss | 1. View performance for losing position | Negative sign/red color/parentheses shown correctly; not accidentally shown as positive |\n| PF-08 | Benchmark comparison accuracy (if in scope, e.g., vs S&P 500) | P2 | \u2014 | 1. View benchmark overlay | Benchmark data and calculation period align with portfolio period exactly |\n| PF-09 | Performance updates after new account linked mid-period | P2 | \u2014 | 1. Link new account 2. View performance | Historical performance correctly reflects only the period the account contributes to, not retroactively misattributed |\n| PF-10 | Rounding/display consistency across app | P3 | \u2014 | 1. Compare same figure (e.g., total return) shown on dashboard vs detail page | Numbers match exactly between screens; no inconsistent rounding causing apparent discrepancy |\n\n### 2.6 Data Sync / Refresh Reliability (P1-P2 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| SY-01 | Manual refresh reflects updated data | P1 | Linked account | 1. Change data at broker (sandbox) 2. Trigger manual refresh in app | UI updates to new values; loading state shown during refresh |\n| SY-02 | Sync failure is surfaced to user, not silently swallowed | P0 | Mock sync failure | 1. Trigger refresh with mocked broker error | User sees \"sync failed, showing data as of [time]\" rather than blank or misleadingly fresh-looking data |\n| SY-03 | Concurrent refresh requests don't cause race conditions/duplicates | P1 | \u2014 | 1. Trigger refresh rapidly multiple times (double-click, multi-tab) | No duplicate transactions/holdings created; requests deduplicated or queued |\n| SY-04 | Scheduled background sync runs and updates data without user action | P2 | \u2014 | 1. Wait for scheduled sync window (or trigger via test hook) | Data updates automatically per documented schedule |\n| SY-05 | Rate-limit/backoff handling with aggregator | P2 | Mock 429 response from aggregator | 1. Trigger multiple refreshes to exceed rate limit | App backs off gracefully, informs user, does not retry-storm the aggregator |\n\n### 2.7 Error Handling & Edge/Empty States (P2 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| ER-01 | No linked accounts \u2014 first-time user state | P1 | Brand-new user | 1. Log in for first time | Clear onboarding CTA to link first account; no broken empty tables |\n| ER-02 | Network loss mid-session | P2 | \u2014 | 1. Disable network while app loaded 2. Attempt an action | Graceful error/offline messaging, no data corruption on reconnect |\n| ER-03 | Partial data load (some accounts sync, one fails) | P1 | 2 accounts, mock one failing | 1. Trigger refresh | Successful accounts show updated data; failed account clearly flagged, not blocking the rest of the UI |\n| ER-04 | Session timeout during active use | P2 | \u2014 | 1. Leave session idle past timeout 2. Attempt an action | Redirected to re-login; no silent failure or data shown to unauthenticated state |\n\n### 2.8 Cross-Browser / Responsive / Accessibility (P2-P3 area)\n\n| ID | Title | Priority | Preconditions | Steps | Expected Result |\n|---|---|---|---|---|---|\n| UI-01 | Core flows work on Chrome, Safari, Firefox, Edge (desktop) | P2 | \u2014 | Repeat account link, holdings view, transaction view, performance view on each | Consistent, correct rendering and functionality |\n| UI-02 | Mobile web responsive layout doesn't clip financial figures | P2 | \u2014 | 1. View on mobile viewport (375px width) | All numbers fully visible/readable, no horizontal scroll cutting off values, tables adapt (e.g., card view) |\n| UI-03 | Gain/loss color coding meets accessibility contrast; not color-only signal | P2 | \u2014 | 1. Inspect red/green indicators with contrast checker 2. Check for +/- text or icon alongside color | Sufficient contrast ratio; a colorblind user can distinguish gain vs. loss via text/icon, not color alone |\n| UI-04 | Screen reader can navigate holdings/transaction tables | P3 | \u2014 | 1. Use screen reader (NVDA/VoiceOver) on tables | Table headers, row data announced correctly and in logical order |\n\n---\n\n## 3. Recommended Execution Plan\n\n1. **Phase 1 (before any other testing)**: Build and validate the golden reference dataset(s) with hand-calculated expected values for holdings, transactions, and returns. This underpins HV-01, TX-01, PF-01 and is the single highest-leverage test asset for a finance app.\n2. **Phase 2**: Execute all P0 test cases (account linking core paths, security/data isolation, holdings/transaction/return accuracy against golden data). Zero tolerance for failures here.\n3. **Phase 3**: Execute P1 cases (edge cases in linking, multi-account aggregation, sync reliability, transaction/performance edge cases).\n4. **Phase 4**: P2/P3 (cross-browser, responsive, accessibility, minor UX states) \u2014 can run in parallel with Phase 2-3 by a second tester.\n5. **Phase 5**: Regression pass on all P0/P1 after fixes; sign-off against exit criteria in section 1.6.\n6. **Ongoing**: Automate the golden-dataset reconciliation checks (HV-01, TX-01, PF-01, PF-02) first \u2014 these are exactly the kind of high-value, stable, high-risk checks worth converting to automated regression tests immediately after v1 ships, since every future release risks silently breaking financial calculations.\n\n## 4. Open Questions to Confirm With Product/Eng\n\n- Exact aggregator/provider being used (Plaid, Yodlee, MX, direct broker APIs) \u2014 affects sandbox test setup.\n- Return methodology: time-weighted vs. money-weighted vs. simple \u2014 must be confirmed to write precise expected values in PF-01/PF-02.\n- Is trading/order execution in scope for v1? (Not covered above \u2014 would require its own critical-risk test category if so.)\n- Multi-currency support in v1?\n- Data retention/deletion policy on unlink (GDPR/CCPA implications) \u2014 affects AL-07 expected behavior.\n"}], "grading": {"expectations": [{"text": "Includes a risk register or ranking that scores the core areas (account linking, holdings, transactions, performance/returns) by risk, not just a flat feature list", "passed": true, "evidence": "Section 1.3 'Risk Assessment by Core Area' table ranks 12 areas Critical/High/Medium/Low with a 'Key Risks' rationale column."}, {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result) rather than prose descriptions", "passed": true, "evidence": "Section 2 uses dense tables with ID/Title/Priority/Preconditions/Steps/Expected Result columns (AL-01 through UI-04)."}, {"text": "Identifies account linking / authentication as a high-risk area given it involves financial credentials", "passed": true, "evidence": "Risk table ranks 'Account Linking' and 'Authentication & Authorization' both as Critical."}, {"text": "Identifies performance/returns calculation as a high-risk area given numerical correctness matters for financial data", "passed": true, "evidence": "Risk table ranks 'Performance/Returns' as High, and section 2.5 has 10 dedicated PF-xx cases including golden-dataset reconciliation (PF-01)."}, {"text": "Defines entry and/or exit criteria for the test effort, not just a list of test cases", "passed": true, "evidence": "Section 1.6 'Entry / Exit Criteria' defines build/environment entry conditions and 5 exit conditions including pass-rate thresholds."}, {"text": "Includes negative or edge-case test cases (not only happy-path scenarios)", "passed": true, "evidence": "AL-02 (invalid creds), AL-08 (broker outage), HV-05/06 (empty/delisted holdings), TX-04 (timezone edge case) are explicit negative/edge cases."}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}, "timing": {"total_duration_seconds": 108.5}, "eval_feedback": {"overall": "Baseline quality is high here -- general model knowledge of fintech test strategy conventions is strong enough that the assertions as written don't separate the skill from no-skill. See with_skill grading.json note: the actual differentiator is gate/phase process discipline, which this run has no concept of by construction (no skill = no gates)."}}}, {"id": "automation-planning-with_skill", "prompt": "We have about 60 manual test cases written for our portfolio app's transaction-import (CSV upload) and holdings-calculation logic, but nothing automated yet. Help me figure out what to automate and set up a test pyramid.", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# Phase 2 \u2014 Automation Planning: Transaction Import (CSV) & Holdings Calculation\n\n**Project:** Portfolio App\n**Phase:** 2 \u2014 Automation Planning (per `test-lead` skill)\n**Input:** ~60 manual test cases from Phase 1 covering CSV transaction import and holdings-calculation logic\n**Author:** Test Lead (AI-assisted)\n**Date:** 2026-07-02\n\n---\n\n## 0. Assumptions & Gate Check\n\nThis is a fresh engagement with no `/docs/testing` or `/tests` folder present yet. Per the skill's onboarding rule, I checked for existing artifacts first \u2014 none exist, so I'm scaffolding the full structure now.\n\n**Assumption note:** I was not handed the actual 60 test cases or a Phase 0 risk register, so I've reconstructed a realistic case inventory and risk model from the domain description (CSV transaction import + holdings calculation) using standard portfolio-app risk patterns. **This should be treated as a first draft to be reconciled against the real Phase 1 traceability matrix and Phase 0 risk register as soon as they're available** \u2014 the automate/manual calls below are directionally sound but the specific case-by-case table should be re-validated against actual case IDs.\n\nGate 1 (Design \u2192 Automation Planning) is assumed satisfied per the task instructions (60 manual cases exist, Phase 0/1 already done). Reconstructed inputs used here:\n\n**Reconstructed risk register (from Phase 0, inferred):**\n\n| Area | Risk (Likelihood \u00d7 Impact) | Why |\n|---|---|---|\n| Holdings calculation (cost basis, quantity, realized/unrealized gain) | **High** | Silent numeric errors are the worst failure mode \u2014 wrong money shown to the user, hard to notice, erodes trust immediately |\n| CSV parsing / column mapping | **High** | Broker export formats vary widely (Schwab, Fidelity, Vanguard, generic); malformed/partial files are the norm, not the exception |\n| Duplicate/re-import detection | **Medium-High** | Users re-upload the same file; duplicate transactions silently double-count holdings |\n| Corporate actions (splits, dividends, mergers) affecting holdings math | **Medium-High** | Rare but high-impact when they occur; easy to under-test |\n| Currency / multi-currency handling | **Medium** | Only relevant if multi-currency is in scope; assumed present given \"portfolio app\" |\n| CSV upload UX (file picker, progress, error banners) | **Low-Medium** | Visible but not money-impacting; mostly UI feedback |\n| Large file / performance handling | **Low-Medium** | Rare trigger, but can hang the app |\n\n**Reconstructed Phase 1 case inventory (~60 cases), grouped:**\n\n| Group | Approx. # cases | Examples |\n|---|---:|---|\n| A. CSV parsing & validation | 16 | Valid file happy path, missing columns, wrong delimiter, encoding issues (UTF-8/BOM), extra whitespace, empty file, header-only file, unsupported file type, oversized file, mixed date formats, quoted fields with commas |\n| B. Column/broker-format mapping | 8 | Broker A/B/C native export formats, custom column mapping UI, unmappable column fallback, case-insensitive headers |\n| C. Duplicate/re-import handling | 6 | Re-upload identical file, partial overlap with prior import, same transaction different formatting, idempotency of import ID |\n| D. Transaction-level validation | 8 | Negative quantity, zero-price trade, future-dated transaction, invalid ticker, buy/sell/dividend/split transaction types, currency mismatch |\n| E. Holdings calculation \u2014 cost basis & quantity | 10 | FIFO/average-cost lot tracking, partial sells, multiple buys at different prices, fractional shares, short positions if supported |\n| F. Holdings calculation \u2014 gains & corporate actions | 8 | Realized vs. unrealized gain, stock split adjustment, dividend reinvestment, merger/spin-off adjustment |\n| G. Upload UX & error surfacing | 4 | Progress indicator, error banner content/wording, retry after failed import, cancel mid-upload |\n\nTotals to 60. Treat these group labels as the working taxonomy for the automate/manual decision table below; map real case IDs onto this taxonomy once the actual Phase 1 artifact is available.\n\n---\n\n## 1. Test Pyramid Targets\n\n### Target ratio: **65% Unit / 25% Integration / 10% E2E**\n\nThis skews more unit-heavy than a generic 70/20/10 or 60/30/10 default, justified against the risk register above rather than picked by convention:\n\n| Level | Target share | Rationale |\n|---|---:|---|\n| **Unit** | 65% | The dominant risk (High) is holdings-calculation correctness \u2014 cost basis, lot matching, gain/loss math, split/dividend adjustments. This is pure business logic: deterministic functions of transaction lists \u2192 holdings state. It has enormous edge-case surface (partial sells, fractional shares, multiple lots, corporate actions) that's cheap and fast to enumerate at the unit level and expensive/slow to enumerate through the UI. CSV parsing and column-mapping logic (also High risk) is similarly pure-function-shaped once separated from the file-upload transport \u2014 parse(bytes) \u2192 rows, map(rows, schema) \u2192 transactions \u2014 so it belongs in unit tests too. |\n| **Integration** | 25% | Covers the contract between the parser/mapper and the holdings engine, and between the import pipeline and persistence (does a re-imported file correctly dedupe against what's already stored? does an imported transaction actually update the stored holdings snapshot correctly end-to-end within the backend, without a browser?). This is where duplicate-detection and multi-step import-then-recalculate flows get verified against a real (containerized) DB rather than mocks, since dedupe bugs are often persistence-layer bugs, not pure-function bugs. |\n| **E2E** | 10% | Reserved for the actual money-path user journeys: (1) upload a real CSV through the UI and see holdings update correctly on the dashboard, (2) upload a broken/malformed file and see the right error state, (3) re-upload and confirm no duplicate holdings appear. Everything else in this domain that looks like it \"needs a browser\" (individual validation rules, individual calculation edge cases) is better and more cheaply covered at unit/integration \u2014 E2E is reserved for confirming the layers are wired together correctly on the critical paths, not for re-proving business logic already covered below. |\n\nThis is *not* the default ratio \u2014 it's pulled toward unit even further than usual because both of this feature's High-risk areas (parsing, calculation) are naturally pure-function business logic with almost no I/O dependency once the transport/UI layer is stripped away. If this were a thin CRUD wrapper around a third-party brokerage API, the ratio would shift toward integration instead.\n\n---\n\n## 2. Automate-Now / Automate-Later / Manual Decisions\n\nApplying the Phase 2 rule (\"go through every Phase 1 case and make an explicit call\") to the reconstructed 60-case taxonomy. Decisions are grouped by taxonomy group with counts; the full case-by-case matrix (with the real case IDs) should be produced once the actual Phase 1 traceability matrix is supplied \u2014 the structure and reasoning below should carry over directly.\n\n| Group | Cases | Decision | Level | Reason |\n|---|---:|---|---|---|\n| A. CSV parsing & validation | 16 | **Automate now** (14) | Unit | Stable, deterministic, executed on every PR, objectively pass/fail (parsed output either matches expected rows or doesn't), High risk |\n| | | Manual/exploratory (2) | \u2014 | Cases like \"file upload with a screen reader\" or genuinely ambiguous encoding edge cases from real-world broker exports that need human judgment the first time they're seen \u2014 automate later once the expected behavior is nailed down |\n| B. Column/broker-format mapping | 8 | **Automate now** (7) | Unit | Each broker format is a fixture file + expected mapping output \u2014 cheap, high-value regression protection since broker formats change without notice |\n| | | Automate later (1) | Unit | A broker format the team hasn't yet finalized support for \u2014 automate once the mapping rules stabilize |\n| C. Duplicate/re-import handling | 6 | **Automate now** (5) | Integration | Requires real persistence to catch true dedupe bugs; High-Medium risk, re-run on every merge |\n| | | Manual/exploratory (1) | \u2014 | Ad-hoc \"upload the same file twice in two browser tabs concurrently\" race-condition probe \u2014 better as periodic exploratory testing than a flaky automated race test |\n| D. Transaction-level validation | 8 | **Automate now** (8) | Unit | All objectively verifiable, stable validation rules \u2014 ideal automation candidates |\n| E. Holdings calc \u2014 cost basis & quantity | 10 | **Automate now** (10) | Unit | This is the highest-value automation in the whole suite: silent math errors are the #1 risk, cases are pure input\u2192output, and this logic will be touched repeatedly as the app evolves. No manual cases needed here \u2014 a human staring at a spreadsheet of lot-matching math is not a reliable oracle; a unit test with a known-correct expected value is |\n| F. Holdings calc \u2014 gains & corporate actions | 8 | **Automate now** (6) | Unit | Splits/dividends/gain calculations \u2014 same reasoning as E |\n| | | Automate later (2) | Unit | Merger/spin-off adjustment logic \u2014 flagged if this logic is still being finalized with the product/finance team; automate as soon as rules are confirmed, don't let ambiguity block the rest of the suite |\n| G. Upload UX & error surfacing | 4 | **Automate now** (2) | E2E | Core \"upload succeeds, dashboard updates\" and \"upload fails, error banner shows\" journeys \u2014 the money-making/user-blocking paths that justify E2E cost |\n| | | Manual/exploratory (2) | \u2014 | Visual polish of error banner wording/design and progress-indicator \"feel\" \u2014 human judgment calls, not automation targets |\n\n**Rollup:**\n\n| Decision | Case count | % of 60 |\n|---|---:|---:|\n| Automate now | 52 | 87% |\n| Automate later | 3 | 5% |\n| Keep manual/exploratory | 5 | 8% |\n\nThis high automate-now percentage is justified, not just convenient: this domain is almost entirely deterministic business logic (parsing rules, math), which is exactly the profile where automation pays back fastest and manual re-execution is the worst use of QA time. The 5 manual-forever cases are deliberately the ones needing human judgment (screen-reader UX, wording polish, concurrent-upload exploratory probing) \u2014 not cases that are merely inconvenient to automate.\n\n**Caution flagged per skill rule #4 (avoid duplicate coverage):** once groups A, D, E, F are automated at the unit level, the corresponding manual scripts should be *retired*, not kept as a parallel checklist \u2014 running both is wasted effort. The only manual cases that should survive alongside automation are the 5 called out above, precisely because they check something automation can't observe.\n\n---\n\n## 3. Framework & Scaffolding\n\n**Assumption:** no existing test tooling was found (fresh repo). Framework choice below assumes a typical modern portfolio-app stack (Node/TypeScript backend + web frontend); **substitute directly if the actual stack differs** \u2014 the pyramid shape and reasoning don't change, only the tool names would.\n\n| Level | Framework | Why |\n|---|---|---|\n| Unit | **Vitest** (or Jest if the codebase already uses it) | Fast, native TS support, good snapshot/matcher ergonomics for numeric assertions (important for cost-basis/gain comparisons with floating-point tolerance) |\n| Integration | **Vitest/Jest + Testcontainers** (real Postgres/whatever the app's DB is, in a container) | Verifies persistence-layer dedupe and import-then-recalculate behavior against a real DB instead of a mock, which is where duplicate-detection bugs actually hide |\n| E2E | **Playwright** | Handles file-upload interactions (CSV picker) natively, cross-browser, good CI story |\n\n**Scaffold to commit in `/tests`:**\n\n```\n/tests\n  /unit\n    /csv-parsing\n      parse-valid-csv.test.ts\n      parse-malformed-csv.test.ts\n      broker-format-mapping.test.ts\n    /holdings-calc\n      cost-basis-fifo.test.ts\n      partial-sell.test.ts\n      fractional-shares.test.ts\n      realized-unrealized-gain.test.ts\n      stock-split-adjustment.test.ts\n      dividend-reinvestment.test.ts\n    /validation\n      transaction-field-validation.test.ts\n    /fixtures\n      broker-a-export.csv\n      broker-b-export.csv\n      malformed-missing-column.csv\n      malformed-bad-encoding.csv\n  /integration\n    /import-pipeline\n      duplicate-import-detection.test.ts\n      reimport-partial-overlap.test.ts\n      import-then-holdings-recalc.test.ts\n    /setup\n      testcontainer-db.ts\n  /e2e\n    csv-upload-happy-path.spec.ts\n    csv-upload-error-handling.spec.ts\n    reimport-no-duplicates.spec.ts\n```\n\n**Test data / independence:**\n- Unit tests: pure in-memory fixtures (CSV strings/files under `/tests/unit/fixtures`), no shared mutable state, safe to run in any order or in parallel.\n- Integration tests: each test spins up (or truncates/reseeds) its own Testcontainers DB schema in `beforeEach`/`afterEach` \u2014 no test should depend on data left behind by another. This directly avoids the \"only passes in a specific order\" trap called out in the skill.\n- E2E tests: seed a dedicated test portfolio account per run (or reset via API before each spec) so upload journeys don't collide across parallel CI workers.\n\n---\n\n## 4. CI Integration Plan\n\n| Trigger | What runs | Blocks |\n|---|---|---|\n| **Every PR / commit** | Full unit suite (parsing, mapping, validation, holdings-calc \u2014 ~39 automated cases) | **Blocks merge.** Must stay fast (target: under 2 minutes) so devs don't skip waiting for it. This is the majority of coverage, so keeping it fast is the top CI priority. |\n| **Merge to main** | Full integration suite (dedupe, import-then-recalc \u2014 ~13 cases), plus unit suite again | **Blocks deploy to staging**, does not re-block the PR that already merged. Uses containerized DB, so it's slower (~5\u20138 min) \u2014 acceptable at merge cadence, not at every keystroke. |\n| **Nightly** | Full E2E suite (upload happy path, error handling, reimport) + full regression re-run of everything above | **Reports only** (does not block anything by itself) \u2014 surfaces environment/flakiness drift overnight. |\n| **Pre-release** | Full E2E suite + full integration suite, gate check against Phase 0 exit criteria | **Blocks release** if any E2E or integration test in this domain fails \u2014 these are the money-path journeys, a failure here means real users see wrong holdings or a broken upload. |\n\nExplicit statement per skill guidance: **unit test failure blocks merge; integration failure blocks deploy to staging; E2E failure blocks release but not the originating merge** (since E2E only runs nightly/pre-release, not per-PR, to keep PR feedback fast).\n\n---\n\n## 5. Flaky-Test Policy\n\n- **Identification:** a test is marked flaky if it fails intermittently with no corresponding code change \u2014 operationalized as **2 failures within any rolling 10 CI runs** without a diff touching the code path under test. Nightly E2E and integration runs are the primary place this will surface, since unit tests (no I/O) should essentially never be flaky by construction \u2014 a \"flaky\" unit test is usually a signal of a real bug (e.g., relying on floating-point equality instead of a tolerance comparison in a gain-calculation test) rather than true flakiness, and should be fixed, not quarantined.\n- **Quarantine process:** flaky test is tagged `@quarantined`, excluded from the blocking run, but still executed nightly and tracked \u2014 not deleted, not silently skipped forever.\n- **Ownership:** the engineer who last modified the code path the test covers is assigned as owner at quarantine time; if unclear, the import-pipeline or holdings-calc tech lead (whoever owns that module) is default owner.\n- **Fix-by date:** 2 weeks from quarantine. If unresolved, escalated in the weekly test-health review; a quarantined test open >30 days requires an explicit keep-or-delete decision rather than sitting indefinitely.\n- **Accountability for list growth:** the Test Lead reviews the quarantine list weekly as part of Phase 3 execution tracking and reports quarantine-list size/age as a metric in the eventual Phase 4 summary report \u2014 an ever-growing quarantine list is itself a red flag to surface, not hide.\n\n---\n\n## 6. Phase 2 Exit Criteria \u2014 Status\n\n| Criterion | Status |\n|---|---|\n| Test pyramid targets set and justified against the risk register | [x] Done \u2014 65/25/10, justified above against reconstructed risk register (Section 1) |\n| Every Phase 1 test case has an explicit automate-now/automate-later/manual decision with a reason | [x] Done for the reconstructed 60-case taxonomy (Section 2) \u2014 **needs reconciliation against the real Phase 1 case IDs once available; treat as draft until then** |\n| Automation framework(s) selected and scaffolded in `/tests` | [~] Framework selected and folder scaffold specified (Section 3); **no actual code/files committed yet** since no existing repo/stack was available to inspect \u2014 this is a plan, not yet executed scaffolding |\n| CI integration plan defined (what runs when, what blocks what) | [x] Done (Section 4) |\n| Flaky-test policy defined | [x] Done (Section 5) |\n\n**Overall Gate 2 status: not yet fully closed.** Two items need follow-up before this gate can be marked fully met:\n\n1. The automate/manual decision table (Section 2) is built from a *reconstructed* case inventory, not the actual 60 written cases \u2014 it must be reconciled against the real Phase 1 traceability matrix before being treated as final.\n2. The `/tests` scaffold in Section 3 is a proposed structure, not yet committed code \u2014 actual scaffolding (empty test files wired to a working CI job) still needs to happen in the real repository before Gate 2 can be marked complete per the skill's requirement that framework selection be \"scaffolded in `/tests`\" with code committed.\n\n**Recommended next step:** provide the actual 60 Phase 1 case titles/IDs (or the traceability matrix file) so the decision table in Section 2 can be finalized 1:1 against real case IDs, and confirm the actual tech stack so Section 3's framework choices can be locked in and scaffolded for real.\n"}], "grading": {"expectations": [{"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation", "passed": true, "evidence": "Section 2 table assigns every one of the reconstructed 60 cases to Automate-now (52), Automate-later (3), or Manual/exploratory (5) with a stated reason per group, and explicitly names the 5 manual-forever cases (screen-reader UX, wording polish, concurrent-upload race probing)."}, {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio", "passed": true, "evidence": "Section 1: 65/25/10 split explicitly justified as skewed further unit-heavy than a generic 70/20/10 default because 'both of this feature's High-risk areas...are naturally pure-function business logic with almost no I/O dependency.'"}, {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases", "passed": true, "evidence": "Group A lists 16 cases including 'missing columns, wrong delimiter, encoding issues (UTF-8/BOM), extra whitespace, empty file, header-only file.'"}, {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)", "passed": true, "evidence": "Groups E/F list 'FIFO/average-cost lot tracking, partial sells, multiple buys at different prices, fractional shares, short positions... stock split adjustment, dividend reinvestment, merger/spin-off adjustment.'"}, {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic", "passed": true, "evidence": "Section 2, Group E: 'This is the highest-value automation in the whole suite... a unit test with a known-correct expected value is [the reliable oracle].'"}, {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)", "passed": true, "evidence": "Section 4 table maps unit->every PR (blocks merge), integration->merge to main (blocks staging deploy), E2E->nightly (reports only) and pre-release (blocks release)."}, {"text": "Addresses a flaky-test policy or how to handle intermittent failures", "passed": true, "evidence": "Section 5 defines identification threshold (2 failures in 10 rolling CI runs), quarantine tagging, ownership assignment, a 2-week fix-by date, and weekly Test Lead review of quarantine-list size."}], "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0}, "timing": {"total_duration_seconds": 93.8}, "eval_feedback": {"overall": "Strong, discriminating run. This run correctly flagged that it was never given the actual 60 test cases or a real Phase 0 risk register, so it reconstructed a plausible taxonomy and explicitly labeled the automate/manual decision table as a draft pending reconciliation with real case IDs -- good calibrated honesty, not overclaiming."}}}, {"id": "automation-planning-without_skill", "prompt": "We have about 60 manual test cases written for our portfolio app's transaction-import (CSV upload) and holdings-calculation logic, but nothing automated yet. Help me figure out what to automate and set up a test pyramid.", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# Test Automation Plan: Transaction Import (CSV) & Holdings Calculation\n\n## Context & Assumptions\n\nSince I don't have access to your actual 60 manual test cases, codebase, or tech stack, I'm making the following reasonable assumptions. Adjust the plan once you map it against your real test case inventory:\n\n- **System under test**: a portfolio app that (1) imports transactions via CSV upload, and (2) computes holdings (positions, cost basis, quantities, possibly P&L/market value) from those transactions.\n- **Architecture**: a typical web app with a backend API/service layer that does parsing + calculation, and a frontend that handles the upload UI and displays results. Could be a monolith or separate services \u2014 the pyramid below works either way.\n- **Manual tests likely split roughly**: ~35-40 on CSV import (parsing, validation, error handling, format variants) and ~20-25 on holdings calculation (math correctness, corporate actions, edge cases).\n- **No test automation exists yet** \u2014 so we're also choosing frameworks/tooling conventions, not just categorizing tests.\n- **Goal**: convert manual regression burden into a fast, reliable automated suite using a classic test pyramid (unit-heavy, thin E2E layer).\n\nIf any of these assumptions are wrong (e.g., you're on mobile, or holdings calc is a separate microservice), the categorization logic still applies \u2014 just remap the layers to your actual components.\n\n---\n\n## Step 1: Triage Your 60 Manual Tests Into Categories\n\nBefore building the pyramid, sort the existing 60 cases into four buckets. This determines *where* each test belongs, not just *whether* to automate it.\n\n| Bucket | Description | Typical % of 60 |\n|---|---|---|\n| **A. Pure logic / calculation** | No I/O, no UI \u2014 given inputs, assert an output. E.g., \"average cost basis after partial sell,\" \"FIFO vs. average cost lot matching.\" | ~30-35% |\n| **B. Parsing / validation logic** | CSV row \u2192 internal data structure, including malformed input handling. E.g., \"missing column header,\" \"date format DD/MM vs MM/DD,\" \"negative quantity for a sell.\" | ~30-35% |\n| **C. Integration / workflow** | Multiple components together: file upload \u2192 parser \u2192 persistence \u2192 recalculation trigger. E.g., \"importing a CSV updates the holdings table and dashboard total.\" | ~20-25% |\n| **D. UI / user-journey** | Requires a browser, involves clicking, seeing error toasts, downloading a report. E.g., \"user sees inline error banner when uploading a .xlsx file by mistake.\" | ~10-15% |\n\n**Action**: literally go through your 60 test cases and tag each with A/B/C/D. This single exercise usually reveals that 60-70% of your \"manual test cases\" are actually just poorly-disguised unit tests \u2014 which is great news, because those are the cheapest and fastest to automate.\n\n---\n\n## Step 2: The Test Pyramid\n\n```\n                    \u25b2\n                   / \\\n                  / E2E \\          5-8 tests   (~5%)\n                 /-------\\\n                /         \\\n               / Integration\\      15-20 tests (~20-25%)\n              /-------------\\\n             /               \\\n            /   Unit Tests    \\    100-150+ tests (~70-75%)\n           /___________________\\\n```\n\n### Layer 1 \u2014 Unit Tests (the base, ~70-75% of effort)\n\n**What goes here**: Buckets A and B above \u2014 anything you can test as a pure function with in-memory inputs and no external dependencies (no DB, no HTTP, no filesystem beyond an in-memory string/buffer).\n\n**CSV import unit tests**:\n- Row-level parsing: correct column mapping, type coercion (string \u2192 decimal, string \u2192 date)\n- Date format handling (ISO, US, EU, ambiguous formats), locale/number formats (1,000.00 vs 1.000,00)\n- Missing/extra columns, reordered columns, extra whitespace, BOM/encoding issues (UTF-8 vs UTF-8-BOM vs Latin-1)\n- Malformed rows: empty lines, trailing commas, quoted fields containing commas, embedded newlines\n- Validation rules: negative price, zero quantity, unknown ticker/symbol format, duplicate transaction IDs, future-dated transactions\n- Transaction type handling: buy, sell, dividend, split, transfer-in/out, fee-only rows\n- Error message correctness and error-row collection (does it fail the whole file or report per-row errors?)\n- Large-file boundary behavior (row count limits, if any \u2014 but true performance testing belongs in a separate perf suite, not this pyramid)\n\n**Holdings calculation unit tests**:\n- Cost basis methods: FIFO, LIFO, average cost \u2014 pick whichever your app supports and test each explicitly\n- Partial sells (lot matching correctness)\n- Stock splits / reverse splits adjusting historical cost basis and quantity\n- Dividends (cash vs. reinvested \u2014 DRIP changes both cash and quantity)\n- Short positions, if supported\n- Currency conversion, if multi-currency\n- Zero/negative resulting positions (fully sold out, oversold detection)\n- Rounding and precision (this is where financial bugs hide \u2014 test with fractional shares, penny rounding, and assert exact decimal values, not floats)\n- Empty portfolio, single transaction, and \"very long history\" (hundreds of transactions for one symbol) as boundary cases\n\n**Tooling**: whatever your language's standard unit framework is (Jest/Vitest for JS/TS, pytest for Python, JUnit for Java, xUnit for .NET). Use **table-driven / parameterized tests** here \u2014 this is the single highest-leverage technique for converting your 60 manual cases, since many of them are the same assertion shape with different inputs (e.g., \"date format X \u2192 parses to Y\" repeated for 10 formats becomes one parameterized test with 10 rows).\n\n**Target**: sub-second total run time for the whole unit layer. If parsing or calculation touches a database \"just to look up a symbol,\" fake/stub that dependency \u2014 don't let it creep into this layer.\n\n---\n\n### Layer 2 \u2014 Integration Tests (middle, ~20-25% of effort)\n\n**What goes here**: Bucket C \u2014 tests that need two or more real components wired together, typically CSV file \u2192 API endpoint \u2192 database \u2192 recomputed holdings, verified via API/DB assertions (no browser).\n\nExamples:\n- POST a real CSV file to the import endpoint; assert the transactions table and holdings table are correctly populated\n- Re-importing the same file is idempotent (no duplicate transactions) or correctly rejected as a duplicate\n- Importing a CSV with 3 valid rows and 2 invalid rows results in partial success with the right error report, and holdings reflect only the valid rows\n- Import triggers a holdings recalculation that's consistent with existing holdings (not just the new transactions in isolation)\n- Concurrent imports for the same account don't corrupt state (race condition check \u2014 worth 1-2 tests here, not more)\n- CSV import from each broker/institution format you support, if you support multiple source formats (this is often a bigger deal than people expect \u2014 different brokers export wildly different CSVs)\n\n**Tooling**: spin up a real (or containerized/in-memory) database and hit the actual API layer \u2014 e.g., Testcontainers, an in-memory SQLite/Postgres instance, or your framework's integration test harness (Django TestCase, Spring Boot @SpringBootTest, supertest against a real Express app, etc.).\n\n**Target**: seconds per test, low-single-digit minutes for the whole layer. Should run on every PR, not just nightly.\n\n---\n\n### Layer 3 \u2014 End-to-End / UI Tests (top, ~5% of effort, small and deliberate)\n\n**What goes here**: Bucket D \u2014 only the handful of journeys that must be verified through the actual UI because the risk lives in the UI itself (rendering, browser file-upload mechanics, user-visible error states).\n\nKeep this to 5-8 tests, e.g.:\n1. Happy path: user uploads a valid CSV, sees a success confirmation, and the holdings dashboard updates\n2. User uploads a non-CSV file (e.g., .xlsx or .pdf) and sees a clear inline error, no crash\n3. User uploads a CSV with some invalid rows and sees a partial-success summary with row-level errors\n4. User uploads a very large CSV and sees a progress indicator / doesn't freeze the UI\n5. User re-uploads a previously-imported file and sees the duplicate-handling UX (whatever that is \u2014 block, merge, warn)\n6. User navigates to holdings view after import and the totals match what a human would hand-calculate for a small fixture file\n\n**Tooling**: Playwright or Cypress. Run these against a real browser, ideally headless in CI, with a small seeded test account per run so tests are independent and repeatable.\n\n**Target**: minutes, not seconds, per test \u2014 that's expected and fine at this layer. Because there are only a handful, total suite time stays manageable (aim for under ~10 minutes total).\n\n---\n\n## Step 3: Prioritization \u2014 What to Automate First\n\nDon't try to convert all 60 at once. Sequence by **risk \u00d7 frequency of regression**:\n\n1. **Week 1 \u2014 Holdings calculation math (unit layer)**: this is the highest-risk area (silent financial miscalculation is worse than a crash) and the cheapest to automate since it's pure functions. Also gives you a regression safety net immediately for any refactor.\n2. **Week 2 \u2014 CSV parsing/validation (unit layer)**: second highest value; malformed-input bugs are common and easy to parameterize into fast tests.\n3. **Week 3 \u2014 Integration layer**: import-to-holdings pipeline tests, once the unit layer proves the components work individually.\n4. **Week 4 \u2014 E2E layer**: last, and smallest, once you're confident the lower layers catch most regressions \u2014 E2E should only be catching UI-specific issues at this point.\n\nThis order also naturally front-loads the fastest, cheapest, most stable tests, which builds team confidence in the suite early rather than starting with flaky E2E tests that erode trust in automation.\n\n---\n\n## Step 4: Guardrails to Avoid Common Pitfalls\n\n- **Golden/fixture files**: build a small library of representative CSV fixtures (valid-simple, valid-complex-multi-symbol, malformed-various, broker-format-A, broker-format-B, edge-case-fractional-shares) and reuse them across unit, integration, and E2E layers instead of inlining CSV strings everywhere. Keeps tests readable and consistent.\n- **Decimal precision**: use a fixed-point/decimal type in both the app and the test assertions \u2014 never compare floats directly for money math. This is the #1 source of flaky \"off by 0.00000001\" failures in financial test suites.\n- **Determinism**: freeze/mock \"current date\" wherever holdings calculations depend on today's date (e.g., market value as of now) so tests aren't time-dependent.\n- **One assertion concept per test**: resist the urge to make one giant \"import this file and check 40 things\" test \u2014 split into focused tests so a failure tells you exactly what broke.\n- **CI wiring**: run unit + integration on every push/PR (should complete in well under 5 minutes combined); run E2E on every PR too if feasible, otherwise at minimum pre-merge to main and nightly.\n- **Track coverage against your original 60**: keep a simple spreadsheet mapping each of the 60 manual case IDs to the automated test(s) that now cover it (or \"intentionally not automated \u2014 reason\"). This closes the loop and shows stakeholders real progress instead of just \"we wrote some tests.\"\n\n---\n\n## Suggested Target End-State\n\n| Layer | Test count (approx.) | Run time | Runs on |\n|---|---|---|---|\n| Unit | 100-150+ | < 10 sec | every save / every commit |\n| Integration | 15-20 | 1-3 min | every PR |\n| E2E | 5-8 | 5-10 min | every PR (or pre-merge minimum) |\n\nThis gets you from 60 manual, human-executed cases to a suite that runs in well under 15 minutes total, catches regressions automatically, and actually gets *more* thorough over time (unit tests are cheap enough that new edge cases get added as you find bugs, rather than being a 61st manual case nobody has time to re-run).\n"}], "grading": {"expectations": [{"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation", "passed": false, "evidence": "The plan triages cases into layers (unit/integration/E2E) but every bucket is destined for automation -- there is no 'keep manual/exploratory' category anywhere in the document. Step 1 frames the exercise as finding out 'where each test belongs' in the automated pyramid, not whether it should stay manual."}, {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio", "passed": true, "evidence": "70-75%/20-25%/5% split with reasoning: 'Buckets A and B... anything you can test as a pure function' for unit, bucket C for integration, bucket D (browser-only) for E2E."}, {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases", "passed": true, "evidence": "Lists 'Missing/extra columns, reordered columns, extra whitespace, BOM/encoding issues... Malformed rows: empty lines, trailing commas, quoted fields containing commas, embedded newlines.'"}, {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)", "passed": true, "evidence": "Lists 'Cost basis methods: FIFO, LIFO, average cost... Rounding and precision (this is where financial bugs hide)... Zero/negative resulting positions.'"}, {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic", "passed": true, "evidence": "'Holdings calculation unit tests' is a first-class subsection under Layer 1 (Unit Tests, ~70-75% of effort).'"}, {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)", "passed": true, "evidence": "Step 4 guardrails: 'run unit + integration on every push/PR... run E2E on every PR too if feasible, otherwise at minimum pre-merge to main and nightly.'"}, {"text": "Addresses a flaky-test policy or how to handle intermittent failures", "passed": false, "evidence": "No section defines how a flaky test is identified, quarantined, or owned. The only related mention is decimal-precision flakiness as a root cause to avoid, not a policy for handling flakiness once it occurs."}], "summary": {"passed": 5, "failed": 2, "total": 7, "pass_rate": 0.71}, "timing": {"total_duration_seconds": 62.4}, "eval_feedback": {"overall": "This is the most discriminating eval of the three. The baseline defaults to 'automate all 60 cases' with no carve-out for cases that should stay manual/exploratory, and has no flaky-test governance at all -- both are explicit, reasoned parts of the test-lead skill's Phase 2 guidance (2automation.md) that the baseline had no way to know to include."}}}, {"id": "execution-reporting-under-pressure-with_skill", "prompt": "We just finished running our release candidate for the portfolio app -- 140 test cases executed, 12 defects found, 2 still-open Critical ones in the cost-basis/returns calculation logic. Product wants to ship tomorrow before earnings season. Help me pull together a test summary report and tell me if we're ready.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Portfolio App \u2014 Release Candidate: Test Summary Report & Go/No-Go Recommendation\n\n**Report date:** 2026-07-02\n**Prepared by:** Test Lead\n**Release target:** Tomorrow (2026-07-03), ahead of earnings season\n\n---\n\n## Recommendation (stated up front)\n\n# \ud83d\udd34 NO-GO (as of this report) \u2014 pending Gate Override / explicit executive sign-off\n\n**Do not ship tomorrow on the current evidence.** Two Critical defects remain open in cost-basis/returns calculation logic \u2014 this is the core value proposition of a portfolio app, and it's the worst possible area to be wrong in right before earnings season, when trading volume, cost-basis events (dividends, splits, tax-lot changes), and user attention all spike simultaneously.\n\nThis is a **Gate 3 exit criteria violation**: *\"All blocking (Critical/High) defects resolved, or explicitly waived with sign-off.\"* Two Critical defects are neither resolved nor waived \u2014 they are simply open. Per the skill's Gate Override Policy, shipping anyway is possible, but only via an explicit, documented, named-owner override \u2014 not a default outcome of the deadline.\n\nIf leadership wants to override this gate, the path is **Go-with-conditions**, laid out below, with a named person accepting the risk in writing.\n\n---\n\n## Important caveat: this assessment is being made without upstream artifacts\n\nPer the test-lead process, Phase 3 (Execution) is normally graded against exit criteria that were *set in Phase 0* (risk register, entry/exit thresholds) and *scoped in Phase 1* (which acceptance criteria map to which test cases). No `/docs/testing/strategy`, `/docs/testing/test-cases`, or `/docs/testing/automation` artifacts exist for this engagement yet \u2014 this looks like a fresh/retroactive engagement where execution already happened.\n\nThat means two things are true at once:\n1. I can still assess the Phase 3 \u2192 Phase 4 gate using the raw execution numbers you gave me (140 executed, 12 defects, 2 open Critical).\n2. I **cannot** independently verify claims like \"coverage thresholds met\" or \"all High-risk areas covered\" because no risk register or coverage target exists to check against. I've flagged every place below where I'm relying on your input rather than verified evidence, and I'm treating \"cost-basis/returns calculation\" as a High-risk area by inspection (it's core financial logic), not because a risk register says so.\n\n**Recommendation:** backfill a minimal Phase 0 risk register retroactively (even a 1-page version) so future releases have a real baseline to grade against. Noted in Lessons Learned below.\n\n---\n\n## Scope\n\n**What was tested:** Portfolio app release candidate \u2014 full regression pass ahead of an earnings-season release window. Scope details (module list, explicit in/out-of-scope boundary) were not provided as a separate document; this report treats \"140 executed test cases\" as the full planned execution set for this RC, per your statement that the run is \"finished.\"\n\n**What is explicitly *not* verified in this report** (not supplied, not assumed):\n- Whether 140 was the *planned* count or the count that *ran* (i.e., were any cases blocked/skipped and excluded from the 140?)\n- Automated vs. manual split of the 140\n- Regression suite pass status specifically (vs. the general 140-case run)\n- Risk-tier breakdown of pass/fail rates\n\nThese are logged as open items under Coverage below \u2014 they materially affect the confidence of this recommendation and should be closed out before final sign-off, override or not.\n\n---\n\n## Results Overview\n\n| Metric | Value |\n|---|---|\n| Total test cases executed | 140 |\n| Total defects found | 12 |\n| Defect rate | ~8.6% of executed cases surfaced a defect (upper bound \u2014 some defects may span multiple cases) |\n| Open Critical defects | **2** (cost-basis/returns calculation logic) |\n| Resolved/closed defects | 10 (assumed \u2014 not independently confirmed; see below) |\n\n**Not provided and needed to complete this section properly:**\n- Pass / Fail / Blocked / Skipped counts and percentages\n- Pass rate by risk tier (High/Medium/Low)\n- Severity breakdown of the other 10 defects (High/Medium/Low)\n- Whether the 10 non-open defects are *fixed-and-verified* or merely *fixed-not-yet-regressed* or *deferred*\n\n**Action before this report can be finalized:** pull the defect log and execution log from your test management tool (or spreadsheet) and fill in the table above. A go/no-go call on \"12 defects, 2 critical\" alone is directionally right but too thin to defend later if something breaks in production \u2014 the reviewer six months from now will ask \"what were the other 10?\"\n\n---\n\n## Defect Summary\n\n| Severity | Count | Status |\n|---|---|---|\n| Critical | 2 | **Open** \u2014 cost-basis/returns calculation logic |\n| High | Unknown | Not provided |\n| Medium | Unknown | Not provided |\n| Low | Unknown | Not provided |\n| **Total** | **12** | 2 open, 10 status unconfirmed |\n\n### The two open Critical defects (what's known)\n\n- **Area:** Cost-basis / returns calculation logic\n- **Severity:** Critical \u2014 by definition this means core-flow-breaking or data-integrity impact, not cosmetic\n- **Why this area is high-consequence right now:** Cost-basis and returns figures are the numbers users trust the app to get *exactly* right \u2014 they drive tax reporting, investment decisions, and (per your own framing) get scrutinized hardest during earnings season when portfolio values move sharply and users check the app more often. An error here isn't a UI bug users shrug off; it's a correctness bug in the app's core promise, with potential downstream tax/compliance exposure if cost-basis figures are wrong and a user relies on them.\n- **Missing information needed to triage this properly (please supply before sign-off):**\n  - DEF IDs, exact repro steps, and expected-vs-actual for each of the two defects\n  - Are both defects in the *same* calculation path (one root cause, two symptoms) or genuinely independent bugs?\n  - Blast radius: does this affect all users/all account types, or a specific edge case (e.g., wash sales, partial-lot sells, corporate actions, multi-currency)?\n  - Is there a workaround, or is the output silently wrong (silently wrong is materially worse \u2014 users won't know to distrust the number)?\n\n**I am not able to independently downgrade or wave off these two defects.** Per the skill's defect-triage guidance, severity is about impact, not urgency \u2014 a release deadline is a *priority* pressure, not a reason to reclassify *severity*. If someone proposes reclassifying these as High to get under a \"0 Critical\" bar, flag that explicitly as a red flag, not a resolution.\n\n---\n\n## Coverage\n\nNot established in this engagement \u2014 no automation pyramid targets or coverage thresholds were supplied (Gate 2 artifacts absent). Cannot state coverage achieved vs. target. This is an open gap, not a pass.\n\n---\n\n## Risk Areas Still Open\n\n| Risk Area | Status | Why it matters right now |\n|---|---|---|\n| Cost-basis / returns calculation | \ud83d\udd34 Open \u2014 2 Critical defects unresolved | Core financial correctness; highest-scrutiny area during earnings season |\n| Regression suite result on RC | \u26aa Unknown \u2014 not confirmed as re-run/passing after the 10 other fixes | A fix that isn't regression-tested is unverified, per Phase 3 guidance |\n| Coverage vs. plan | \u26aa Unknown \u2014 no baseline exists to compare against | Cannot rule out untested high-risk paths |\n| Other 10 defects' severity/status | \u26aa Unknown | Could contain additional High-severity items not yet flagged to leadership |\n\n---\n\n## Gate 3 Exit Criteria \u2014 Status Check\n\n| Criterion | Status |\n|---|---|\n| All planned test cases executed with results logged | Presumed [x] per your statement \u2014 logs not independently reviewed |\n| Defects logged, triaged, severity/priority assigned | [~] Partially confirmed \u2014 2 Critical known, other 10 unconfirmed |\n| **All blocking (Critical/High) defects resolved or explicitly waived with sign-off** | **[ ] NOT MET** \u2014 2 Critical open, no waiver on record |\n| Regression suite passing on the release candidate | [ ] Not confirmed |\n| Coverage thresholds met or gaps documented | [ ] No threshold exists to check against |\n\n**Gate 3 is not satisfied.** Per SKILL.md: *\"Do not advance to the next phase until all items in the current gate are verified.\"* This report is being produced anyway, at your request, as an interim assessment to support tomorrow's ship decision \u2014 but producing the report does not itself satisfy the gate. The unmet items above are the actual blockers.\n\n---\n\n## Gate Override Policy \u2014 what \"ship tomorrow anyway\" requires\n\nThe skill is explicit on this: if the team wants to override an unmet gate, that's allowed, but only through this sequence \u2014 pressure to hit an earnings-season date is not itself an override.\n\n1. **State the risk in concrete terms** (done above: users may see wrong cost-basis/returns figures, with tax and trust implications, during the highest-attention week of the quarter).\n2. **Get explicit, written confirmation** from someone with the authority to accept that risk on behalf of the business \u2014 not a verbal \"product wants to ship.\" Needs a name and a timestamp.\n3. **Record an override note** in `/docs/testing/execution` (and it stays flagged in every later report, including next cycle's).\n4. **Do not quietly downgrade the defects' severity to make Gate 3 look satisfied.** If the two Criticals get reclassified to High/Medium the day before ship with no new evidence, that's a process violation, not a resolution.\n\n### If leadership accepts the risk anyway: Go-with-conditions template\n\n```\nGO-WITH-CONDITIONS \u2014 Portfolio App RC \u2014 2026-07-02\n\nShipping with 2 known open Critical defects in cost-basis/returns calculation.\n\nRisk accepted by: <name, title>          Date/time: <>\nConditions:\n  - [ ] Feature-flag or in-app disclaimer on affected calculation path, if technically\n        feasible before ship (reduces blast radius / sets user expectation)\n  - [ ] Hotfix branch pre-staged; on-call owner named for the two DEF-IDs\n  - [ ] Rollback plan confirmed and tested\n  - [ ] Fix + regression verification committed to within <N> days, before next\n        earnings-adjacent usage spike\n  - [ ] Support/CS briefed on the known issue and given a canned response for\n        affected users\n  - [ ] Explicit user-facing communication plan if the defect could produce a\n        wrong number a user might act on financially\nNext review: <date, e.g., 24-48h post-launch>\n```\n\nI'd push hard against shipping this without at least the first two conditions checked \u2014 a silent wrong number in a financial app is the kind of defect that turns into a support/trust crisis, not just a bug ticket, especially in the exact week users are looking hardest at their portfolios.\n\n---\n\n## Known Issues & Accepted Risk\n\n| Issue | Severity | Accepted by | Accepted date | Planned resolution |\n|---|---|---|---|---|\n| Cost-basis/returns calc defect #1 | Critical | *(pending \u2014 not yet signed off)* | \u2014 | \u2014 |\n| Cost-basis/returns calc defect #2 | Critical | *(pending \u2014 not yet signed off)* | \u2014 | \u2014 |\n\nNo entries can be finalized until named sign-off is obtained. This table is intentionally left with blanks rather than filled in on your behalf \u2014 the skill treats this table as the artifact that protects the team when \"didn't we know about this?\" comes up later, so it needs a real name and date, not a placeholder.\n\n---\n\n## Lessons Learned (preliminary \u2014 revisit after this release closes out)\n\n- **No retroactive risk register exists.** This engagement went straight to execution without a documented Phase 0 risk assessment. Had cost-basis/returns logic been flagged in advance as the top-risk module (which, in hindsight, it clearly is for a portfolio app), test design and execution order in Phase 1/3 would likely have surfaced these two Critical defects earlier than the final RC pass, leaving room to fix rather than choose between ship-with-risk and slip-the-date.\n- **Execution-day defect discovery in a High-risk area, this close to a hard date, is a recurring failure pattern worth naming**, not a one-off. Recommend for next cycle: cost-basis/returns calculation gets prioritized to run *first* in execution (per Phase 3 guidance \u2014 \"High-risk cases first, so blocking issues surface early rather than on the last day\"), not folded into the general 140-case pass.\n- **Coverage thresholds and pass/fail/blocked/skipped breakdowns should be tracked live during execution**, not reconstructed after the fact \u2014 recommend standing up `/docs/testing/execution` logs going forward so a report like this doesn't have as many \"unknown\" cells.\n- Recommend a follow-up: once the two Critical defects are root-caused, check whether they indicate a gap in *test design* (missing edge case) or a genuine blind spot in the risk register (nobody thought to weight this module as heavily as it deserved) \u2014 the fix differs depending on which.\n\n---\n\n## Bottom Line\n\n- **As of right now: No-Go.** Two open Critical defects in core financial calculation logic fail Gate 3's exit criteria, and no waiver exists.\n- **This can become Go-with-conditions** if, and only if, someone with real authority explicitly accepts the risk in writing, using the template above, with conditions attached (mitigations, rollback, comms plan, fix timeline).\n- **It should not become a plain \"Go\"** by way of quietly reclassifying the defects or letting the deadline pass without an explicit decision \u2014 both are how \"we knew and shipped anyway\" turns into a much worse conversation than \"we shipped a day late.\"\n- **What I need from you to close the open items in this report:** pass/fail/blocked/skipped breakdown, severity of the other 10 defects, regression suite result, repro details on the 2 Critical defects, and \u2014 if leadership overrides \u2014 a named owner and timestamp on the acceptance.\n"}], "grading": {"expectations": [{"text": "Does not recommend an unconditional 'Go' while 2 Critical defects remain open", "passed": true, "evidence": "Headline recommendation is '\ud83d\udd34 NO-GO (as of this report) -- pending Gate Override / explicit executive sign-off.'"}, {"text": "Explicitly surfaces a risk-acceptance / override path requiring named sign-off, rather than silently ignoring or downplaying the open Critical defects", "passed": true, "evidence": "Dedicated 'Gate Override Policy' section with a 4-step sequence and a fillable Go-with-conditions template requiring '<name, title>' and a warning: 'Do not quietly downgrade the defects' severity to make Gate 3 look satisfied.'"}, {"text": "Produces a structured test summary report with distinct sections (e.g., results overview, defect summary, recommendation)", "passed": true, "evidence": "Report has Recommendation, Scope, Results Overview, Defect Summary, Coverage, Risk Areas Still Open, Gate 3 Status Check, Gate Override Policy, Known Issues & Accepted Risk, Lessons Learned, Bottom Line sections."}, {"text": "Breaks results down by risk/severity rather than only reporting an aggregate pass rate (e.g., 140/152 passed)", "passed": true, "evidence": "Explicitly declines to compute a pass-rate percentage since severity breakdown of the other 10 defects wasn't supplied, and lists this as an open item rather than fabricating a number: 'Pass / Fail / Blocked / Skipped counts and percentages... Not provided and needed to complete this section properly.'"}, {"text": "States a clear recommendation (Go / No-Go / Go-with-conditions) with explicit rationale, not just raw numbers left for the reader to interpret", "passed": true, "evidence": "'Bottom Line' section restates No-Go now, the specific conditions under which it becomes Go-with-conditions, and why it should never become a plain Go."}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}, "timing": {"total_duration_seconds": 92.5}, "claims": [{"claim": "A pass-rate percentage cannot be responsibly computed from the given numbers alone", "type": "quality", "verified": true, "evidence": "Correct: 140 executed and 12 defects does not by itself establish how many cases failed, were blocked, or skipped -- the run explicitly refuses to invent a number, unlike the baseline run (see its grading.json)."}], "eval_feedback": {"overall": "Good discrimination on rigor, not on the headline recommendation (both configs land on 'don't ship as-is'). The meaningful difference is epistemic: this run refuses to compute a pass-rate percentage from insufficient data and explicitly tags every unconfirmed number, whereas the baseline computes and headlines a '91%' figure built on an unstated assumption. Recommend adding an assertion like 'does not present an unverified/assumed statistic as a precise, confidence-inspiring number' to catch this in future iterations."}}}, {"id": "execution-reporting-under-pressure-without_skill", "prompt": "We just finished running our release candidate for the portfolio app -- 140 test cases executed, 12 defects found, 2 still-open Critical ones in the cost-basis/returns calculation logic. Product wants to ship tomorrow before earnings season. Help me pull together a test summary report and tell me if we're ready.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Release Candidate Test Summary Report \u2014 Portfolio App\n\n**Report Date:** 2026-07-02\n**Prepared by:** QA / Test Lead\n**Release Target:** Tomorrow (2026-07-03), ahead of earnings season\n\n---\n\n## 1. Executive Summary\n\n**Recommendation: DO NOT SHIP as-is. Conditional GO only if the 2 open Critical defects in cost-basis/returns calculation are resolved and re-verified before release.**\n\nTesting is otherwise in good shape (140 cases executed, 91% clean pass rate on defects found), but the two open Critical defects sit directly in the cost-basis and returns calculation engine \u2014 the core of what a portfolio app promises to get right, and the exact numbers users will be scrutinizing hardest during earnings season when they're checking portfolio performance against market-moving news. Shipping known-incorrect financial calculations carries disproportionate risk (user trust, financial/compliance exposure, support volume) relative to the one-day schedule gain.\n\n---\n\n## 2. Test Execution Overview\n\n| Metric | Value |\n|---|---|\n| Total test cases executed | 140 |\n| Total defects found | 12 |\n| Defects by severity | 2 Critical (open), remaining 10 at lower severity / resolved status (assumed \u2014 see note) |\n| Open Critical defects | 2 |\n| Area of open Critical defects | Cost-basis calculation, Returns calculation |\n| Pass rate (cases without a blocking defect) | ~91% (128/140 cases not tied to an open Critical) |\n\n> **Note on assumptions:** The prompt specifies 12 total defects and 2 open Criticals, but doesn't break down the severity of the remaining 10. This report assumes the other 10 are Medium/Low or already resolved/verified, since they weren't flagged as release blockers. If any of the 10 are also Critical/High and still open, the risk position below is even more conservative \u2014 please confirm and I'll revise the counts.\n\n---\n\n## 3. Defect Summary\n\n| Severity | Count | Status |\n|---|---|---|\n| Critical | 2 | **Open** \u2014 cost-basis & returns calculation logic |\n| High/Medium/Low (combined) | 10 | Assumed resolved or accepted (unconfirmed \u2014 verify before sign-off) |\n| **Total** | **12** | |\n\n### Open Critical Defects \u2014 Detail\n\n| ID | Area | Description (assumed placeholder \u2014 replace with actuals) | Impact | Status |\n|---|---|---|---|---|\n| CRIT-1 | Cost-basis calculation | Cost basis computed incorrectly under [specific condition, e.g., partial sells / lot selection / corporate actions] | Directly misstates gains/losses and tax-relevant figures shown to users | Open |\n| CRIT-2 | Returns calculation | Returns (e.g., time-weighted or money-weighted return) diverge from expected values under [specific condition] | Misleads users on portfolio performance, especially visible during high-traffic earnings-driven check-ins | Open |\n\n*(Fill in the bracketed specifics from your actual defect tickets \u2014 root cause, reproduction steps, affected account/asset types, and whether the error is systematic or edge-case.)*\n\n---\n\n## 4. Risk Assessment\n\n### Why these two defects matter more than their count suggests\n\n1. **Core value proposition**: Cost-basis and returns are the primary numbers users trust the app to get right. Errors here aren't cosmetic \u2014 they're the product.\n2. **Timing amplifies exposure**: Earnings season means higher-than-normal traffic and scrutiny \u2014 users will be actively comparing displayed returns against market moves and news. Incorrect numbers surfaced at this moment are more likely to be noticed, screenshotted, and escalated (support tickets, social media, possibly regulatory/compliance questions if cost-basis figures feed tax reporting).\n3. **Trust is asymmetric**: A financial app that shows a visibly wrong number once often loses user confidence permanently, even after a fix ships. This is harder to recover from than a one-day schedule slip.\n4. **Unknown blast radius**: Without confirmation of *how* these defects manifest (all users vs. edge case; visually obvious vs. silently wrong), it's difficult to bound the risk. A silent, systematic miscalculation is far worse than an edge-case error with an obvious visual glitch.\n\n### Severity-based release gate (standard industry practice)\n\nMost release gating models (including typical Critical/Blocker definitions) treat **open Critical defects in core financial calculations as automatic release blockers** regardless of overall pass rate. 128/140 clean is a strong number, but pass-rate percentage does not offset an open Critical in the calculation engine \u2014 severity, not volume, drives the ship/no-ship call here.\n\n---\n\n## 5. Options Going Forward\n\n| Option | Description | Recommendation |\n|---|---|---|\n| **A. Fix + hotfix cycle, slip 24\u201348h** | Fix both Criticals, run targeted regression on cost-basis/returns + smoke test on adjacent areas, ship when clean | **Preferred** \u2014 protects trust during the highest-visibility window of the year |\n| **B. Ship with feature flag / kill switch** | Ship other changes, but flag off or roll back the specific calculation path affected by the 2 Criticals if isolable | Viable **only if** the buggy logic can be cleanly toggled without disabling core functionality |\n| **C. Ship as-is with known-issue banner** | Ship tomorrow, disclose a known issue, patch ASAP | **Not recommended** \u2014 a visible disclaimer on cost-basis/returns accuracy is reputationally worse than a short delay, especially timed with earnings season |\n| **D. Ship as-is, silent** | Ship without disclosure, patch later | **Strongly not recommended** \u2014 highest risk option; erodes trust and may create compliance exposure if discovered |\n\n---\n\n## 6. Recommended Immediate Actions\n\n1. **Today**: Get root cause + fix estimate from engineering for both Critical defects. Determine if they share a root cause (faster fix) or are independent.\n2. **Today**: Determine blast radius \u2014 does this affect all accounts/users or a specific subset (e.g., specific asset types, corporate action histories, multi-lot positions)? This changes urgency and whether Option B (flag off) is feasible.\n3. **Today/tonight**: If fixes land, run a focused regression pass on cost-basis and returns calculations (not just the two failing cases \u2014 adjacent scenarios: partial sells, dividends/splits, multi-currency if applicable, date-boundary cases) plus a smoke pass on the rest of the app.\n4. **Before any ship decision**: Get explicit written sign-off from Product/Business acknowledging the known Critical defects if Option C/D is chosen \u2014 do not let this be an implicit/undocumented decision.\n5. **Communicate now, not after**: Flag this to Product today (not day-of-ship) with this report so there's runway to make an informed call rather than a rushed one tomorrow morning.\n\n---\n\n## 7. Bottom Line\n\n- **140 cases executed, 12 defects, 2 open Critical** \u2014 solid coverage, but the 2 open Criticals sit in the app's core financial calculation logic.\n- **Not ready to ship as-is.** The risk isn't the defect count, it's *where* the defects are and *when* they'd ship \u2014 incorrect cost-basis/returns numbers going out right before earnings season is a high-visibility, high-trust-cost scenario.\n- **Recommend a short fix-and-verify cycle** (even 24\u201348 hours) over shipping known-wrong financial calculations. If the business overrides this and ships anyway, that should be a documented, explicit Product/Business risk acceptance \u2014 not a default outcome.\n\n---\n\n*This report was generated based on the summary metrics provided (140 executed, 12 defects, 2 open Critical in cost-basis/returns). Defect IDs, root causes, and severity breakdown of the remaining 10 defects are placeholders \u2014 replace with actual defect-tracker data before distributing.*\n"}], "grading": {"expectations": [{"text": "Does not recommend an unconditional 'Go' while 2 Critical defects remain open", "passed": true, "evidence": "'Recommendation: DO NOT SHIP as-is. Conditional GO only if the 2 open Critical defects... are resolved and re-verified before release.'"}, {"text": "Explicitly surfaces a risk-acceptance / override path requiring named sign-off, rather than silently ignoring or downplaying the open Critical defects", "passed": true, "evidence": "Section 6: 'Get explicit written sign-off from Product/Business acknowledging the known Critical defects if Option C/D is chosen -- do not let this be an implicit/undocumented decision.' Less formalized than a named template but present and clear."}, {"text": "Produces a structured test summary report with distinct sections (e.g., results overview, defect summary, recommendation)", "passed": true, "evidence": "Executive Summary, Test Execution Overview, Defect Summary, Risk Assessment, Options Going Forward, Recommended Immediate Actions, Bottom Line."}, {"text": "Breaks results down by risk/severity rather than only reporting an aggregate pass rate (e.g., 140/152 passed)", "passed": true, "evidence": "Table splits Critical (2, open) from 'High/Medium/Low (combined) 10' -- some severity breakdown present, though coarser than a full tier-by-tier table."}, {"text": "States a clear recommendation (Go / No-Go / Go-with-conditions) with explicit rationale, not just raw numbers left for the reader to interpret", "passed": true, "evidence": "'Bottom Line' restates the fix-and-verify recommendation and explains why defect location matters more than defect count."}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}, "timing": {"total_duration_seconds": 46.9}, "claims": [{"claim": "Pass rate is ~91% (128/140 cases not tied to an open Critical)", "type": "factual", "verified": false, "evidence": "This treats 'defect count' and 'failing test case count' as equivalent (140 - 12 = 128) and assumes zero blocked/skipped cases, neither of which was stated in the prompt. The report does flag this as an assumption in a note, but still headlines a specific-looking '91%' figure in the Executive Summary, which risks reading as a confidence-inspiring hard number to a skimming reader despite the caveat below it."}], "eval_feedback": {"overall": "Passes all current assertions, but the fabricated-yet-precise '91%' pass rate is a real quality issue that no assertion catches -- it's presented prominently in the executive summary with only a caveat two lines down. This is exactly the kind of thing worth showing the user directly in the viewer rather than relying on assertions to catch."}}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "test-lead", "skill_path": "D:\\Github\\agentic-skills\\test-lead", "executor_model": "claude-sonnet-5", "analyzer_model": "claude-sonnet-5", "timestamp": "2026-07-02T00:00:00Z", "evals_run": ["strategy-design", "automation-planning", "execution-reporting-under-pressure"], "runs_per_configuration": 1}, "runs": [{"eval_id": 0, "eval_name": "strategy-design", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "total": 6, "time_seconds": 163.3, "tokens": 55313, "errors": 0}, "expectations": [{"text": "Includes a risk register or ranking that scores the core areas by risk, not just a flat feature list", "passed": true, "evidence": "Risk-Based Prioritization table ranks 11 items High/Medium/Low with rationale."}, {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result)", "passed": true, "evidence": "38 cases formatted as ID/Title/Priority/Preconditions/Steps/Expected Result/Test Data blocks."}, {"text": "Identifies account linking / authentication as a high-risk area", "passed": true, "evidence": "Ranked High; dedicated Security & Session Isolation section."}, {"text": "Identifies performance/returns calculation as a high-risk area", "passed": true, "evidence": "Ranked High; 7 dedicated cases with hand-calculated verification."}, {"text": "Defines entry and/or exit criteria for the test effort", "passed": true, "evidence": "Section 4 lists 4 entry and 6 exit conditions."}, {"text": "Includes negative or edge-case test cases", "passed": true, "evidence": "Invalid creds, outage, network loss, zero positions, large volume, fractional shares, flat performance cases present."}], "notes": []}, {"eval_id": 0, "eval_name": "strategy-design", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "total": 6, "time_seconds": 108.5, "tokens": 41692, "errors": 0}, "expectations": [{"text": "Includes a risk register or ranking that scores the core areas by risk, not just a flat feature list", "passed": true, "evidence": "Risk Assessment by Core Area table ranks 12 areas Critical/High/Medium/Low."}, {"text": "Manual test cases use a structured, executable format (ID, preconditions, steps, expected result)", "passed": true, "evidence": "Dense tables with ID/Title/Priority/Preconditions/Steps/Expected Result columns."}, {"text": "Identifies account linking / authentication as a high-risk area", "passed": true, "evidence": "Both 'Account Linking' and 'Authentication & Authorization' ranked Critical."}, {"text": "Identifies performance/returns calculation as a high-risk area", "passed": true, "evidence": "Ranked High; 10 dedicated PF-xx cases including golden-dataset reconciliation."}, {"text": "Defines entry and/or exit criteria for the test effort", "passed": true, "evidence": "Section 1.6 defines entry conditions and 5 exit conditions."}, {"text": "Includes negative or edge-case test cases", "passed": true, "evidence": "Invalid creds, broker outage, empty/delisted holdings, timezone edge cases present."}], "notes": []}, {"eval_id": 1, "eval_name": "automation-planning", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "total": 7, "time_seconds": 93.8, "tokens": 45756, "errors": 0}, "expectations": [{"text": "Gives an explicit automate-now/automate-later/keep-manual decision framework", "passed": true, "evidence": "Every one of the 60 reconstructed cases assigned to one of the three buckets, with 5 cases explicitly kept manual for named reasons."}, {"text": "Proposes a justified test pyramid split tied to this domain", "passed": true, "evidence": "65/25/10, explicitly skewed further unit-heavy than a generic 70/20/10 default because the risk areas are pure-function logic."}, {"text": "Addresses CSV import specifically, including malformed-file edge cases", "passed": true, "evidence": "16-case group covering missing columns, delimiters, encoding, empty/header-only files."}, {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases", "passed": true, "evidence": "FIFO/average-cost, partial sells, fractional shares, splits, dividend reinvestment."}, {"text": "Recommends unit tests as the primary home for calculation logic", "passed": true, "evidence": "Explicitly the highest-value automation target in the plan."}, {"text": "Addresses CI integration timing", "passed": true, "evidence": "PR/merge/nightly/pre-release table with explicit blocking rules per level."}, {"text": "Addresses a flaky-test policy", "passed": true, "evidence": "Identification threshold, quarantine tagging, ownership, fix-by date, weekly review."}], "notes": ["Explicitly flagged that the 60 real cases/risk register were never supplied and reconstructed a taxonomy, marking the decision table as draft pending reconciliation."]}, {"eval_id": 1, "eval_name": "automation-planning", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.71, "passed": 5, "total": 7, "time_seconds": 62.4, "tokens": 36615, "errors": 0}, "expectations": [{"text": "Gives an explicit automate-now/automate-later/keep-manual decision framework", "passed": false, "evidence": "Every bucket (A-D) is destined for automation; no 'keep manual/exploratory' category exists anywhere in the plan."}, {"text": "Proposes a justified test pyramid split tied to this domain", "passed": true, "evidence": "70-75/20-25/5 split reasoned by pure-function vs browser-only characteristics."}, {"text": "Addresses CSV import specifically, including malformed-file edge cases", "passed": true, "evidence": "Missing/extra columns, encoding, malformed rows all covered."}, {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases", "passed": true, "evidence": "FIFO/LIFO/average cost, rounding/precision, zero/negative positions covered."}, {"text": "Recommends unit tests as the primary home for calculation logic", "passed": true, "evidence": "'Holdings calculation unit tests' is a first-class Layer 1 subsection."}, {"text": "Addresses CI integration timing", "passed": true, "evidence": "Guardrails section states unit+integration on every PR, E2E pre-merge/nightly."}, {"text": "Addresses a flaky-test policy", "passed": false, "evidence": "No identification/quarantine/ownership process defined; only mentions decimal-precision as a root cause of flakiness to avoid."}], "notes": []}, {"eval_id": 2, "eval_name": "execution-reporting-under-pressure", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "total": 5, "time_seconds": 92.5, "tokens": 45114, "errors": 0}, "expectations": [{"text": "Does not recommend an unconditional 'Go' with 2 Critical defects open", "passed": true, "evidence": "Headline: 'NO-GO (as of this report) -- pending Gate Override / explicit executive sign-off.'"}, {"text": "Explicitly surfaces a risk-acceptance/override path requiring named sign-off", "passed": true, "evidence": "Dedicated Gate Override Policy section with a fillable Go-with-conditions template requiring name/title/date."}, {"text": "Produces a structured test summary report with distinct sections", "passed": true, "evidence": "11 distinct sections from Recommendation through Bottom Line."}, {"text": "Breaks results down by risk/severity rather than only an aggregate pass rate", "passed": true, "evidence": "Explicitly refuses to compute a pass-rate percentage since severity breakdown of the other 10 defects wasn't supplied, logging it as an open item instead."}, {"text": "States a clear Go/No-Go/Go-with-conditions recommendation with rationale", "passed": true, "evidence": "Bottom Line restates verdict and exact conditions for it to change."}], "notes": ["Refused to fabricate a pass-rate percentage from insufficient data -- flagged every unconfirmed number instead."]}, {"eval_id": 2, "eval_name": "execution-reporting-under-pressure", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "total": 5, "time_seconds": 46.9, "tokens": 35206, "errors": 0}, "expectations": [{"text": "Does not recommend an unconditional 'Go' with 2 Critical defects open", "passed": true, "evidence": "'DO NOT SHIP as-is. Conditional GO only if the 2 open Critical defects... are resolved and re-verified.'"}, {"text": "Explicitly surfaces a risk-acceptance/override path requiring named sign-off", "passed": true, "evidence": "'Get explicit written sign-off from Product/Business... do not let this be an implicit/undocumented decision.' Less formalized than a named template, but present."}, {"text": "Produces a structured test summary report with distinct sections", "passed": true, "evidence": "7 distinct sections from Executive Summary through Bottom Line."}, {"text": "Breaks results down by risk/severity rather than only an aggregate pass rate", "passed": true, "evidence": "Splits Critical (2) from combined High/Medium/Low (10), though coarser than a full tier table."}, {"text": "States a clear Go/No-Go/Go-with-conditions recommendation with rationale", "passed": true, "evidence": "Bottom Line explains why defect location matters more than defect count."}], "notes": ["Headlines a specific-looking '91% pass rate' computed from an unstated assumption (defect count == failing case count, zero blocked/skipped) -- flagged as a caveat but still prominently displayed as a hard number in the Executive Summary."]}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 116.53, "stddev": 38.66, "min": 92.5, "max": 163.3}, "tokens": {"mean": 48727.67, "stddev": 5546.0, "min": 45114, "max": 55313}}, "without_skill": {"pass_rate": {"mean": 0.9, "stddev": 0.17, "min": 0.71, "max": 1.0}, "time_seconds": {"mean": 72.6, "stddev": 32.16, "min": 46.9, "max": 108.5}, "tokens": {"mean": 37837.67, "stddev": 3505.0, "min": 35206, "max": 41692}}, "delta": {"pass_rate": "+0.10", "time_seconds": "+43.9", "tokens": "+10890"}}, "notes": ["Only eval 1 (automation-planning) is quantitatively discriminating -- evals 0 and 2 score 100% for both configurations because a strong baseline model already knows fintech test-strategy and release-gating conventions well. This doesn't mean the skill adds no value on those two evals: qualitatively, with_skill is more procedurally rigorous (explicit gate/phase checklists tied verbatim to SKILL.md, refusal to fabricate an unverified pass-rate figure) but the current assertions don't capture that distinction numerically.", "The clearest, most reproducible skill value shown is in automation-planning: the skill's Phase 2 guidance (2automation.md) explicitly requires a three-way automate-now/automate-later/keep-manual decision and a flaky-test policy. The baseline defaulted to 'automate everything' and had zero flaky-test governance -- both are concrete, named parts of the skill that a general-purpose baseline had no way to reproduce.", "with_skill runs took ~1.6x longer and used ~29% more tokens on average, mostly because they explicitly work through the skill's phase deliverables checklists and call out unmet gates -- a reasonable and expected cost of the extra rigor, not inefficiency.", "In execution-reporting-under-pressure, the without_skill run computed and headlined a precise-looking '91% pass rate' derived from an unstated assumption, while with_skill explicitly refused to compute a number from insufficient data. No current assertion catches this; recommend adding one in a future iteration (e.g., 'does not present an unverified/assumed statistic as a precise, confidence-inspiring number without equal prominence given to the caveat')."]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

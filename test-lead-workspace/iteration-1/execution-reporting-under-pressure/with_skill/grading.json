@@ -1,0 +1,17 @@
+{
+  "expectations": [
+    {"text": "Does not recommend an unconditional 'Go' while 2 Critical defects remain open", "passed": true, "evidence": "Headline recommendation is '🔴 NO-GO (as of this report) -- pending Gate Override / explicit executive sign-off.'"},
+    {"text": "Explicitly surfaces a risk-acceptance / override path requiring named sign-off, rather than silently ignoring or downplaying the open Critical defects", "passed": true, "evidence": "Dedicated 'Gate Override Policy' section with a 4-step sequence and a fillable Go-with-conditions template requiring '<name, title>' and a warning: 'Do not quietly downgrade the defects' severity to make Gate 3 look satisfied.'"},
+    {"text": "Produces a structured test summary report with distinct sections (e.g., results overview, defect summary, recommendation)", "passed": true, "evidence": "Report has Recommendation, Scope, Results Overview, Defect Summary, Coverage, Risk Areas Still Open, Gate 3 Status Check, Gate Override Policy, Known Issues & Accepted Risk, Lessons Learned, Bottom Line sections."},
+    {"text": "Breaks results down by risk/severity rather than only reporting an aggregate pass rate (e.g., 140/152 passed)", "passed": true, "evidence": "Explicitly declines to compute a pass-rate percentage since severity breakdown of the other 10 defects wasn't supplied, and lists this as an open item rather than fabricating a number: 'Pass / Fail / Blocked / Skipped counts and percentages... Not provided and needed to complete this section properly.'"},
+    {"text": "States a clear recommendation (Go / No-Go / Go-with-conditions) with explicit rationale, not just raw numbers left for the reader to interpret", "passed": true, "evidence": "'Bottom Line' section restates No-Go now, the specific conditions under which it becomes Go-with-conditions, and why it should never become a plain Go."}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+  "timing": {"total_duration_seconds": 92.5},
+  "claims": [
+    {"claim": "A pass-rate percentage cannot be responsibly computed from the given numbers alone", "type": "quality", "verified": true, "evidence": "Correct: 140 executed and 12 defects does not by itself establish how many cases failed, were blocked, or skipped -- the run explicitly refuses to invent a number, unlike the baseline run (see its grading.json)."}
+  ],
+  "eval_feedback": {
+    "overall": "Good discrimination on rigor, not on the headline recommendation (both configs land on 'don't ship as-is'). The meaningful difference is epistemic: this run refuses to compute a pass-rate percentage from insufficient data and explicitly tags every unconfirmed number, whereas the baseline computes and headlines a '91%' figure built on an unstated assumption. Recommend adding an assertion like 'does not present an unverified/assumed statistic as a precise, confidence-inspiring number' to catch this in future iterations."
+  }
+}

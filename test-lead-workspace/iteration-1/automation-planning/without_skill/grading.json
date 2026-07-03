@@ -1,0 +1,16 @@
+{
+  "expectations": [
+    {"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation", "passed": false, "evidence": "The plan triages cases into layers (unit/integration/E2E) but every bucket is destined for automation -- there is no 'keep manual/exploratory' category anywhere in the document. Step 1 frames the exercise as finding out 'where each test belongs' in the automated pyramid, not whether it should stay manual."},
+    {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio", "passed": true, "evidence": "70-75%/20-25%/5% split with reasoning: 'Buckets A and B... anything you can test as a pure function' for unit, bucket C for integration, bucket D (browser-only) for E2E."},
+    {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases", "passed": true, "evidence": "Lists 'Missing/extra columns, reordered columns, extra whitespace, BOM/encoding issues... Malformed rows: empty lines, trailing commas, quoted fields containing commas, embedded newlines.'"},
+    {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)", "passed": true, "evidence": "Lists 'Cost basis methods: FIFO, LIFO, average cost... Rounding and precision (this is where financial bugs hide)... Zero/negative resulting positions.'"},
+    {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic", "passed": true, "evidence": "'Holdings calculation unit tests' is a first-class subsection under Layer 1 (Unit Tests, ~70-75% of effort).'"},
+    {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)", "passed": true, "evidence": "Step 4 guardrails: 'run unit + integration on every push/PR... run E2E on every PR too if feasible, otherwise at minimum pre-merge to main and nightly.'"},
+    {"text": "Addresses a flaky-test policy or how to handle intermittent failures", "passed": false, "evidence": "No section defines how a flaky test is identified, quarantined, or owned. The only related mention is decimal-precision flakiness as a root cause to avoid, not a policy for handling flakiness once it occurs."}
+  ],
+  "summary": {"passed": 5, "failed": 2, "total": 7, "pass_rate": 0.71},
+  "timing": {"total_duration_seconds": 62.4},
+  "eval_feedback": {
+    "overall": "This is the most discriminating eval of the three. The baseline defaults to 'automate all 60 cases' with no carve-out for cases that should stay manual/exploratory, and has no flaky-test governance at all -- both are explicit, reasoned parts of the test-lead skill's Phase 2 guidance (2automation.md) that the baseline had no way to know to include."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "expectations": [
+    {"text": "Does not recommend an unconditional 'Go' while 2 Critical defects remain open", "passed": true, "evidence": "'Recommendation: DO NOT SHIP as-is. Conditional GO only if the 2 open Critical defects... are resolved and re-verified before release.'"},
+    {"text": "Explicitly surfaces a risk-acceptance / override path requiring named sign-off, rather than silently ignoring or downplaying the open Critical defects", "passed": true, "evidence": "Section 6: 'Get explicit written sign-off from Product/Business acknowledging the known Critical defects if Option C/D is chosen -- do not let this be an implicit/undocumented decision.' Less formalized than a named template but present and clear."},
+    {"text": "Produces a structured test summary report with distinct sections (e.g., results overview, defect summary, recommendation)", "passed": true, "evidence": "Executive Summary, Test Execution Overview, Defect Summary, Risk Assessment, Options Going Forward, Recommended Immediate Actions, Bottom Line."},
+    {"text": "Breaks results down by risk/severity rather than only reporting an aggregate pass rate (e.g., 140/152 passed)", "passed": true, "evidence": "Table splits Critical (2, open) from 'High/Medium/Low (combined) 10' -- some severity breakdown present, though coarser than a full tier-by-tier table."},
+    {"text": "States a clear recommendation (Go / No-Go / Go-with-conditions) with explicit rationale, not just raw numbers left for the reader to interpret", "passed": true, "evidence": "'Bottom Line' restates the fix-and-verify recommendation and explains why defect location matters more than defect count."}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+  "timing": {"total_duration_seconds": 46.9},
+  "claims": [
+    {"claim": "Pass rate is ~91% (128/140 cases not tied to an open Critical)", "type": "factual", "verified": false, "evidence": "This treats 'defect count' and 'failing test case count' as equivalent (140 - 12 = 128) and assumes zero blocked/skipped cases, neither of which was stated in the prompt. The report does flag this as an assumption in a note, but still headlines a specific-looking '91%' figure in the Executive Summary, which risks reading as a confidence-inspiring hard number to a skimming reader despite the caveat below it."}
+  ],
+  "eval_feedback": {
+    "overall": "Passes all current assertions, but the fabricated-yet-precise '91%' pass rate is a real quality issue that no assertion catches -- it's presented prominently in the executive summary with only a caveat two lines down. This is exactly the kind of thing worth showing the user directly in the viewer rather than relying on assertions to catch."
+  }
+}

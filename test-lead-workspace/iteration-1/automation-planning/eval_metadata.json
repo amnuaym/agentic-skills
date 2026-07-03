@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "automation-planning",
+  "prompt": "We have about 60 manual test cases written for our portfolio app's transaction-import (CSV upload) and holdings-calculation logic, but nothing automated yet. Help me figure out what to automate and set up a test pyramid.",
+  "assertions": [
+    {"text": "Gives an explicit decision framework (automate-now / automate-later / keep-manual) rather than a blanket 'automate everything' recommendation"},
+    {"text": "Proposes a test pyramid split (unit/integration/E2E) with reasoning tied to this specific domain, not just a generic unexplained ratio"},
+    {"text": "Addresses CSV import specifically, including malformed-file or bad-data edge cases"},
+    {"text": "Addresses holdings-calculation logic specifically, including numerical edge cases (rounding, zero/negative values, currency conversion if relevant)"},
+    {"text": "Recommends unit tests as the primary home for calculation logic given it's fast, isolated business logic"},
+    {"text": "Addresses CI integration -- when different test levels should run (PR vs nightly vs pre-release)"},
+    {"text": "Addresses a flaky-test policy or how to handle intermittent failures"}
+  ]
+}
