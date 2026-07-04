@@ -1,0 +1,70 @@
+{
+  "skill_name": "ux-designer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "tooltip-as-fix-pushback",
+      "prompt": "Users keep getting confused by our 'Archive' button on the dashboard -- they think it deletes the item. Let's just add a tooltip explaining what it does.",
+      "expected_output": "Pushes back on the tooltip as the fix, framing it as a workaround rather than a solution, and proposes fixing the actual affordance (clearer label, icon, or confirmation copy that distinguishes archive from delete) instead of relying on hover text that a first-time user won't see before clicking.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly frames adding a tooltip as a workaround/deferral rather than accepting it as the resolution"},
+        {"text": "Proposes a concrete alternative fix to the affordance itself (e.g. clearer label, different icon, or in-context confirmation text) rather than only the tooltip"},
+        {"text": "Notes that a tooltip requires hovering before the mistake happens, which doesn't prevent the confusion it's meant to address"},
+        {"text": "Does not simply agree to add the tooltip and move on"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "custom-dropdown-accessibility-gap",
+      "prompt": "Here's our custom dropdown component: a <div> with an onClick handler that shows/hides a list of <div> options below it, styled to look like a select. Any concerns?",
+      "expected_output": "Flags multiple concrete gaps: no keyboard support (can't be opened/navigated via keyboard), missing ARIA roles/attributes (should announce as a listbox/combobox with expanded state), and no focus management (focus doesn't move into the option list or return to the trigger on close) -- rather than only commenting on visual styling.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that a <div> with onClick has no built-in keyboard support (can't be triggered by Enter/Space, no arrow-key navigation)"},
+        {"text": "Identifies the missing ARIA role/state (e.g. should behave like a listbox or combobox with an expanded/collapsed state exposed)"},
+        {"text": "Raises a focus management concern (focus should move into the option list when opened and/or return to the trigger when closed)"},
+        {"text": "Recommends a concrete remediation (native <select>/<button> where possible, or proper ARIA + keyboard handling for the custom version) rather than only listing problems"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tabindex-hack-flagged",
+      "prompt": "Our form fields are visually out of order on the page for layout reasons, so we set tabindex values like 1, 2, 3, 4 manually on each field to fix the tab order. Does that work?",
+      "expected_output": "Flags the use of positive tabindex values as a fragile anti-pattern, explains it overrides natural DOM order and becomes a maintenance liability as the page changes, and recommends reordering the underlying DOM/source order (with CSS used for the visual layout) instead of manual tabindex numbering.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies positive tabindex values (1, 2, 3...) as an anti-pattern rather than confirming it's a good solution"},
+        {"text": "Explains the maintenance/fragility risk of manual tabindex numbers as the page evolves"},
+        {"text": "Recommends fixing DOM/source order and using CSS for visual positioning instead of tabindex hacks"},
+        {"text": "Does not simply validate the tabindex 1/2/3/4 approach as correct"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "color-only-status-indicator",
+      "prompt": "We show order status as a colored dot next to each row -- green means shipped, yellow means processing, red means delayed. Good to ship?",
+      "expected_output": "Flags this as a color-only accessibility gap (fails for colorblind users and anyone not perceiving color, and violates WCAG's 'don't rely on color alone' principle) and recommends adding a second signal such as an icon, text label, or pattern alongside the color.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that using color alone to convey status is an accessibility problem, not just a nice-to-have improvement"},
+        {"text": "References the specific issue (e.g. colorblind users, or WCAG's use-of-color guidance) rather than a vague 'consider accessibility' comment"},
+        {"text": "Recommends a concrete second signal (icon, text label, or pattern) in addition to color"},
+        {"text": "Does not approve shipping as-is without raising this gap"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "first-run-empty-state-design",
+      "prompt": "We're building a new 'Projects' page. When a brand-new user signs up, the page will just show an empty table with column headers and no rows. Is that fine for launch?",
+      "expected_output": "Flags that a bare empty table fails the self-narration bar for a first-time user (no indication of what to do next) and recommends a designed empty state that explains the page is empty because no projects exist yet and surfaces the create-a-project action directly, rather than leaving the user to infer the next step from column headers alone.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that a bare empty table doesn't meet the zero-onboarding/self-narration bar for a first-time user"},
+        {"text": "Distinguishes this as a genuinely-empty first-run state (not a filtered or error state) and asks for or proposes a specific empty-state message for that case"},
+        {"text": "Recommends surfacing the primary action (e.g. 'create your first project') directly within the empty state, not just relying on the user to find a button elsewhere"},
+        {"text": "Does not approve the bare empty table as sufficient for launch without raising this"}
+      ]
+    }
+  ]
+}

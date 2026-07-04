@@ -1,0 +1,150 @@
+{
+  "skill_name": "compliance-officer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "no-trigger-stays-out",
+      "prompt": "Can you help me refactor this function to reduce cyclomatic complexity? It's just some internal math utility code, no user data involved.",
+      "expected_output": "Recognizes there is no compliance signal (no personal/regulated data, no named regulation, no explicit compliance ask) and either declines to engage the compliance framework at all or explicitly notes it isn't relevant here, instead of running a full compliance readiness assessment on a plain refactor request.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not produce a compliance readiness note, control-family mapping, or regulation analysis for this request"},
+        {"text": "Does not ask jurisdiction/data-classification questions unrelated to the refactor being requested"},
+        {"text": "If compliance is mentioned at all, it is only to note that no regulatory signal applies here, not as a substantive assessment"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "gdpr-signal-scoped",
+      "prompt": "We're adding an EU user signup flow that stores name, email, and IP address. What do we need to think about for GDPR?",
+      "expected_output": "Names GDPR explicitly, scopes applicability (EU users, personal data types involved), maps to relevant control families (legal basis/consent, data minimization, data subject rights, retention, breach notification), and identifies evidence needed per family -- without asserting the design 'is compliant' and without pulling in unrelated regulations (e.g. HIPAA, PCI-DSS) that don't apply to a signup flow.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly names GDPR rather than speaking only in generic 'compliance' terms"},
+        {"text": "Identifies relevant control families such as legal basis/consent, data minimization, retention, and data subject rights"},
+        {"text": "Does not assert or imply that the design 'is GDPR compliant' -- frames it as readiness/gaps instead"},
+        {"text": "Does not needlessly pull in unrelated frameworks (e.g. HIPAA, PCI-DSS, SOX) that don't apply to a signup flow with name/email/IP"},
+        {"text": "Flags that legal/DPO review is recommended before treating anything here as a compliance guarantee"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "conflicting-regimes",
+      "prompt": "A user in the EU asked us to delete all their data under GDPR, but our finance team says we're required to keep transaction records for 7 years under SOX. What do we do?",
+      "expected_output": "Names both regimes explicitly, states the conflict plainly (erasure right vs. retention requirement), and asks who should decide / recommends escalating to legal rather than silently picking one side or inventing a resolution unilaterally.",
+      "files": [],
+      "assertions": [
+        {"text": "Names both GDPR (erasure) and SOX (retention) explicitly as being in tension"},
+        {"text": "States the conflict plainly rather than glossing over it"},
+        {"text": "Does not silently resolve the conflict by picking one regime's requirement as correct without flagging it as a decision that needs sign-off"},
+        {"text": "Recommends escalation to a qualified reviewer (legal/compliance) for the final call"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "iso27001-scoping",
+      "prompt": "A customer wants us to get ISO 27001 certified this year. Where do we even start?",
+      "expected_output": "Names ISO 27001 explicitly and treats it as an ISMS-level effort (not a single product feature), asking about scope (which business units/systems), and covering the risk assessment / risk treatment plan / Statement of Applicability as the core early deliverables -- while being explicit that only an accredited certification body can actually certify, not this skill.",
+      "files": [],
+      "assertions": [
+        {"text": "Names ISO 27001 explicitly and frames it as an Information Security Management System (ISMS) effort, not a single feature/codebase fix"},
+        {"text": "Asks about or addresses ISMS scope definition (which business units/systems/locations are in scope)"},
+        {"text": "Mentions the risk assessment and risk treatment plan as foundational work"},
+        {"text": "Mentions the Statement of Applicability (SoA) covering Annex A controls"},
+        {"text": "States explicitly that this skill/assessment cannot itself grant certification -- an accredited certification body must certify"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "owasp-not-a-certification",
+      "prompt": "Our biggest customer's security team sent us a questionnaire asking if we're OWASP compliant. How do we answer?",
+      "expected_output": "Clarifies that 'OWASP compliant' is not a real certifiable status (OWASP is a benchmark, not a regulation with a certifying body), reframes the answer around demonstrating alignment with the OWASP Top 10 / ASVS verification level with concrete evidence (scan results, threat model, pen test), and recommends AppSec/security team involvement in answering the questionnaire rather than asserting compliance outright.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly states that there is no such thing as being 'OWASP compliant' in a certifiable sense -- OWASP is a benchmark/guideline, not a regulation with a certifying body"},
+        {"text": "Reframes the response around demonstrating alignment with OWASP Top 10 categories and/or an ASVS verification level"},
+        {"text": "References concrete evidence types (e.g. SAST/DAST/SCA scan results, threat model, penetration test report) rather than a bare yes/no answer"},
+        {"text": "Recommends involving the AppSec/security team (or a pen tester) rather than answering the customer questionnaire unilaterally"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "iso42001-scoping-and-ai-act",
+      "prompt": "We're shipping an AI-powered resume screening feature and our enterprise customer wants to know if we're ISO 42001 certified, and whether that means we're covered under the EU AI Act. What should we tell them?",
+      "expected_output": "Names ISO 42001 explicitly and treats it as an AI management system effort scoped to the specific AI system (the resume screening feature), covering AI-specific risk/impact assessment (bias/fairness is especially relevant for a hiring-related AI system) and human oversight -- while explicitly stating that ISO 42001 certification does not by itself mean the system complies with the EU AI Act (a separate binding regulation), and recommending legal review given resume screening is a plausible high-risk use case under that Act.",
+      "files": [],
+      "assertions": [
+        {"text": "Names ISO 42001 explicitly and scopes it to the specific AI system (resume screening), not 'AI' generically"},
+        {"text": "Raises bias/fairness and human oversight as particularly relevant risk areas given this is a hiring-related AI system"},
+        {"text": "Explicitly states that ISO 42001 certification does not automatically mean compliance with the EU AI Act or other binding AI regulation -- treats them as distinct"},
+        {"text": "Recommends legal/compliance review specific to the EU AI Act rather than treating the ISO 42001 answer as sufficient on its own"},
+        {"text": "Does not assert the company 'is ISO 42001 certified' or 'is EU AI Act compliant' outright without evidence/qualification"}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "hipaa-no-official-certification",
+      "prompt": "Our marketing team wants to put 'HIPAA Certified' on our website since we handle patient data for clinics. Is that accurate?",
+      "expected_output": "Corrects the claim -- there is no official HIPAA certification program, so 'HIPAA Certified' is a misleading marketing claim -- and reframes toward accurate language ('HIPAA compliant,' backed by a documented risk analysis and safeguards), while also checking whether the company is actually a covered entity or business associate and whether a risk analysis and BAAs with clinic customers exist.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly states that no official 'HIPAA Certified' credential exists and flags the marketing claim as inaccurate/misleading"},
+        {"text": "Recommends alternative accurate framing (e.g. 'HIPAA compliant' backed by documented controls) instead of a certification claim"},
+        {"text": "Asks or addresses whether the company is a covered entity or business associate"},
+        {"text": "Raises the need for a HIPAA risk analysis and/or Business Associate Agreements with the clinics as evidence, not just a marketing label"}
+      ]
+    },
+    {
+      "id": 7,
+      "name": "pci-dss-scoping-and-saq",
+      "prompt": "We're a small e-commerce store starting to accept credit cards directly on our own checkout page instead of redirecting to Stripe Checkout. What PCI requirements do we need to worry about?",
+      "expected_output": "Flags that hosting the card entry fields directly (rather than using a hosted/redirect solution) pulls raw cardholder data into the merchant's own CDE, substantially increasing PCI-DSS scope and likely SAQ complexity (e.g. SAQ A-EP or higher instead of SAQ A) -- and suggests that using a hosted payment field/tokenization approach would reduce scope, rather than just listing all 12 requirements without addressing the scoping decision itself.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that self-hosting the card entry form increases PCI-DSS scope compared to a redirect/hosted-fields approach"},
+        {"text": "Mentions the CDE (Cardholder Data Environment) concept or a scope-reduction option (tokenization, hosted fields) rather than jumping straight to listing all 12 requirements"},
+        {"text": "References the SAQ type distinction (e.g. SAQ A vs. SAQ A-EP or higher) as relevant to their specific architecture choice"},
+        {"text": "Does not assert the store is or will be 'PCI compliant' outright without qualification"}
+      ]
+    },
+    {
+      "id": 8,
+      "name": "sox-segregation-of-duties",
+      "prompt": "Our billing engineer wants to both write the code that changes subscription prices in our revenue system and personally approve and deploy that change to production, since he's the only one who understands that system. Is that a problem?",
+      "expected_output": "Flags this as a segregation-of-duties violation relevant to SOX ITGC (the same person cannot both author and approve/deploy a change to a system that materially affects financial reporting), and recommends a concrete remediation (a second reviewer/approver) rather than accepting the 'he's the only one who understands it' justification at face value.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly identifies this as a segregation-of-duties issue under SOX ITGC"},
+        {"text": "Does not accept 'he's the only one who understands the system' as sufficient justification to skip a second approver"},
+        {"text": "Recommends a concrete fix (e.g. a second reviewer/approver for changes to this financial system) rather than only describing the risk abstractly"},
+        {"text": "Frames this as relevant because the system materially affects financial reporting (subscription/revenue), not just as a generic code-review best practice"}
+      ]
+    },
+    {
+      "id": 9,
+      "name": "soc2-type-distinction",
+      "prompt": "A prospect is asking for our SOC 2 report before signing. We just finished a 2-week audit and got a report. Good to send over?",
+      "expected_output": "Asks or clarifies whether the report is Type I (point-in-time design) or Type II (operating effectiveness over a period, typically 6-12 months) before treating it as satisfying the prospect's request -- a 2-week engagement is far too short to be a Type II audit period, so this should be flagged as a likely Type I, which many enterprise prospects specifically want Type II for.",
+      "files": [],
+      "assertions": [
+        {"text": "Distinguishes Type I from Type II and asks or infers which one this report is"},
+        {"text": "Flags that a 2-week engagement is inconsistent with a Type II audit period (which requires evidence over 6-12 months), suggesting this is likely a Type I report"},
+        {"text": "Notes that many enterprise customers specifically expect Type II, so sending a Type I without clarifying could be a mismatch"},
+        {"text": "Does not simply say 'yes, send it over' without addressing the Type I vs Type II distinction"}
+      ]
+    },
+    {
+      "id": 10,
+      "name": "ccpa-ad-tech-sharing",
+      "prompt": "We're a California-based company with about $30M in annual revenue. We don't sell any customer data -- we just use Google Analytics and a couple of ad-tech pixels for retargeting campaigns. Are we in scope for CCPA?",
+      "expected_output": "Confirms the company meets the CCPA/CPRA revenue threshold ($25M+), and explains that ad-tech/retargeting pixel integrations likely qualify as 'sharing' (cross-context behavioral advertising) under CPRA even though no money changes hands -- so the 'we don't sell data' framing is likely incorrect, and opt-out/GPC obligations probably apply.",
+      "files": [],
+      "assertions": [
+        {"text": "Confirms the company meets the CCPA/CPRA applicability threshold based on the stated $30M revenue"},
+        {"text": "Explains that ad-tech/retargeting pixels can constitute 'sharing' under CPRA even without a literal sale of data"},
+        {"text": "Pushes back on the assumption that 'we don't sell data' means they're out of scope"},
+        {"text": "Mentions the opt-out mechanism and/or Global Privacy Control (GPC) signal handling as a likely obligation given this scenario"}
+      ]
+    }
+  ]
+}
