@@ -8,7 +8,7 @@ This repository is the home for reusable agentic skills that can be shared publi
 
 ## Repository layout
 
-- Each skill lives in its own top-level directory (e.g. `delivery-lead/`, `test-lead/`, `product-owner/`, `sre-engineer/`, `compliance-officer/`, `bcp-planner/`), containing a `SKILL.md` and any supporting reference files.
+- Each skill lives in its own top-level directory (e.g. `delivery-lead/`, `test-lead/`, `product-owner/`, `sre-engineer/`, `compliance-officer/`, `bcp-planner/`, `ux-designer/`), containing a `SKILL.md` and any supporting reference files.
 
 ## Using this repository
 
