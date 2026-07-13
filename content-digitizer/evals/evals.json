@@ -1,0 +1,70 @@
+{
+  "skill_name": "content-digitizer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "prefer-native-over-ocr",
+      "prompt": "I have a screenshot of a PDF page I want to feed to the model. Should I just OCR the screenshot?",
+      "expected_output": "Asks whether the original PDF is available instead of the screenshot, and if it has a real text layer, recommends extracting text directly from the PDF rather than OCR-ing a screenshot of it -- explaining that a screenshot is a lossy re-encoding of content that may already be natively digital, so OCR-ing it is an avoidable accuracy and token cost.",
+      "files": [],
+      "assertions": [
+        {"text": "Asks whether the original PDF (rather than the screenshot) is available"},
+        {"text": "Recommends checking for a native text layer in the PDF before defaulting to OCR"},
+        {"text": "Explains that OCR-ing a screenshot of already-digital content is an avoidable source of error/cost compared to native extraction"},
+        {"text": "Does not simply agree to OCR the screenshot without raising the native-source alternative"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "table-serialization-token-choice",
+      "prompt": "I scraped an HTML table with 500 rows of sales data and want to paste the raw HTML into the prompt. Good idea?",
+      "expected_output": "Recommends against pasting raw HTML for tabular data, explaining that a format like CSV/TSV would represent the same information far more token-efficiently than repeated HTML tags per cell, and proposes converting the table to CSV (or a similarly compact structured format) before including it, rather than approving the raw HTML paste.",
+      "files": [],
+      "assertions": [
+        {"text": "Recommends against including the raw HTML table as-is due to token inefficiency"},
+        {"text": "Proposes a more compact serialization (e.g. CSV/TSV) as the alternative"},
+        {"text": "Explains the reasoning (repeated tags/markup per cell cost tokens without adding information) rather than just asserting it's inefficient"},
+        {"text": "Does not simply approve pasting the raw 500-row HTML table"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "low-confidence-ocr-flagging",
+      "prompt": "I ran OCR on a scanned invoice and it extracted the total as '$1,2OO.00' -- the O's look like they might actually be zeros. Should I just go with what OCR gave me?",
+      "expected_output": "Flags this as a high-stakes value (a monetary amount) that should be spot-checked against the original image rather than trusted as-is, given the visible ambiguity between 'O' and '0', and recommends verifying or clearly flagging the uncertainty rather than silently passing '$1,2OO.00' through as a reliable value.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies the monetary amount as a high-stakes value warranting verification rather than blind trust in the OCR output"},
+        {"text": "Does not recommend simply accepting '$1,2OO.00' as-is without flagging the ambiguity"},
+        {"text": "Recommends either verifying against the original image or explicitly flagging the uncertainty in the output"},
+        {"text": "Treats this as a concrete example of a low-confidence extraction requiring explicit handling, not a minor detail"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "dont-summarize-critical-content",
+      "prompt": "This 40-page contract is too long for our context budget. Let's just summarize the whole thing into a couple of paragraphs before sending it to the model for a compliance check.",
+      "expected_output": "Pushes back on blanket summarization for a compliance-check task, explaining that summarizing away specific clauses/terms would defeat the purpose of a task that depends on exact contractual language, and recommends alternatives like retrieving only the relevant sections/clauses for the specific compliance question, or clearly distinguishing which parts (e.g. boilerplate) are safe to condense from which parts (specific obligations, terms, dates) must be preserved verbatim.",
+      "files": [],
+      "assertions": [
+        {"text": "Pushes back on blanket summarization of the entire contract given the task is a compliance check that likely depends on exact language"},
+        {"text": "Distinguishes between content safe to condense (boilerplate) and content that must be preserved verbatim (specific clauses/terms/obligations)"},
+        {"text": "Proposes an alternative such as retrieving only the relevant sections rather than summarizing everything"},
+        {"text": "Does not simply agree to summarize the whole 40-page contract into a couple of paragraphs"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "boilerplate-vs-content-distinction",
+      "prompt": "This scraped documentation site has the same sidebar navigation and footer repeated on every one of the 30 pages I extracted. Can we just strip all repeated-looking text to save tokens?",
+      "expected_output": "Agrees that the repeated navigation/footer boilerplate should be stripped or deduplicated, but cautions against stripping 'all repeated-looking text' indiscriminately, since some legitimately repeated content (e.g. a recurring code pattern, a standard warning notice that varies slightly per page, or similar-looking headings with different content) could be mistaken for boilerplate and wrongly removed -- recommends verifying what's actually identical/non-informational before stripping rather than a blanket repeated-text filter.",
+      "files": [],
+      "assertions": [
+        {"text": "Agrees that genuine boilerplate (repeated nav/footer) is safe to strip or deduplicate"},
+        {"text": "Cautions against a blanket 'strip all repeated-looking text' rule, since some repeated-looking content may still be informational and differ page to page"},
+        {"text": "Recommends checking that stripped content is actually identical/non-informational rather than assuming anything that looks repeated is boilerplate"},
+        {"text": "Does not simply approve an indiscriminate repeated-text filter without this caveat"}
+      ]
+    }
+  ]
+}
