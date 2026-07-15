@@ -37,13 +37,13 @@ It requires a supported package manager (`apt-get`, `brew`, or `dnf`) and, for t
 
 ## Tool Readiness Check (Mandatory Before Any Conversion)
 
-Run this before invoking any local tool, every time — not just the first time a tool is used in a session. Steps 1-3 are exactly what `setup.sh` automates; run it first and only fall back to doing this by hand if it can't run in the current environment.
+This is something you execute yourself, automatically, as the first action of any conversion task — not a checklist to hand to the user. Do it every time, not just the first time a tool is used in a session. Steps 1-3 are exactly what `setup.sh` automates; execute it directly and only fall back to doing this by hand if the script itself can't run in the current environment (no shell access, no supported package manager, no permissions).
 
-1. **Confirm it's installed.** Run `./setup.sh --check`, or manually check for the binary/library on the system (e.g., `which tesseract`, `pip show pymupdf`, `pandoc --version`) rather than assuming it's present because it was used before or because it's commonly pre-installed.
+1. **Confirm it's installed.** Execute `./setup.sh --check`, or manually check for the binary/library on the system (e.g., `which tesseract`, `pip show pymupdf`, `pandoc --version`) rather than assuming it's present because it was used before or because it's commonly pre-installed.
 2. **Check the installed version.** `setup.sh --check` reports this directly; manually, run the tool's version command and compare it against the latest available release (package registry, project release page, or system package manager's available-update listing).
-3. **If outdated, update before converting.** Run `./setup.sh` (or `./setup.sh --with-heavy` if the task needs one of the gated tools) to bring everything current in one pass; manually, use the appropriate package manager (`pip install --upgrade <package>`, `apt install --only-upgrade <package>`, `brew upgrade <package>`) — don't proceed on a stale version and hope the output is still correct.
+3. **If outdated, update before converting.** Execute `./setup.sh` (or `./setup.sh --with-heavy` if the task needs one of the gated tools) to bring everything current in one pass; manually, use the appropriate package manager (`pip install --upgrade <package>`, `apt install --only-upgrade <package>`, `brew upgrade <package>`) — don't proceed on a stale version and hope the output is still correct.
 4. **If it can't be updated or installed, say so explicitly.** Flag the limitation rather than silently falling back to a degraded method (e.g., quietly switching from a real PDF parser to naive regex-based text scraping) without telling the user what changed and why.
-5. **Re-check periodically, not just once per session.** A tool confirmed current at the start of a long working session may have a new release mid-session — re-run `./setup.sh --check` before a new batch of conversions if meaningful time has passed, rather than trusting an earlier check indefinitely.
+5. **Re-check periodically, not just once per session.** A tool confirmed current at the start of a long working session may have a new release mid-session — re-execute `./setup.sh --check` before a new batch of conversions if meaningful time has passed, rather than trusting an earlier check indefinitely.
 
 ## Why Freshness Matters Per Tool Type
 
