@@ -65,6 +65,19 @@
         {"text": "Recommends checking that stripped content is actually identical/non-informational rather than assuming anything that looks repeated is boilerplate"},
         {"text": "Does not simply approve an indiscriminate repeated-text filter without this caveat"}
       ]
+    },
+    {
+      "id": 5,
+      "name": "stale-tool-freshness-check",
+      "prompt": "We have Tesseract OCR installed from about two years ago on this machine. It's worked fine before, so let's just use it to OCR this batch of scanned contracts.",
+      "expected_output": "Does not simply proceed with the two-year-old installation on the basis that it 'worked fine before'; recommends checking the installed version against the latest available release and updating first if outdated, explaining that OCR accuracy improves across versions and an outdated engine can silently misread text with no error raised, especially relevant for a batch of contracts where accuracy matters.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not simply approve using the two-year-old Tesseract installation without checking its version first"},
+        {"text": "Recommends checking the installed version against the latest available release before running the OCR batch"},
+        {"text": "Recommends updating the tool first if it's found to be outdated, rather than proceeding regardless"},
+        {"text": "Explains that an outdated OCR engine can silently produce worse/misread output without raising an error, not just that updating is generally good practice"}
+      ]
     }
   ]
 }

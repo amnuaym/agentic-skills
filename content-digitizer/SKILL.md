@@ -23,22 +23,24 @@ Activate this skill when:
 * Preparing content for a RAG pipeline or a prompt where the context budget is tight
 * A prior extraction produced output that looks garbled, suspiciously large, or otherwise untrustworthy
 
-## The Four-Step Process
+## The Process
 
 Each step has its own reference file — consult it for the specific techniques rather than reasoning from general instinct alone:
 
-1. **Format Triage** — see `format-triage.md`. Detect the input's actual form and decide whether it's already proper digital form or needs conversion.
+0. **Tool Readiness Check** — see `local-tools.md`. Before invoking any local tool for a conversion, confirm it's installed and check its version against the latest available release; update it first if it's outdated, and flag explicitly if it can't be updated rather than silently falling back to a worse method.
+1. **Format Triage** — see `format-triage.md`. Detect the input's actual form and decide whether it's already proper digital form or needs conversion. See `file-format-matrix.md` for a quick lookup across common file types.
 2. **Digitization & Extraction** — see `digitization-extraction.md`. Convert non-digital or poorly-structured input into clean, faithful digital text/structured data, preferring native extraction over OCR/vision wherever a real text layer exists.
 3. **Token Optimization** — see `token-optimization.md`. Strip what costs tokens without adding information — boilerplate, redundant markup, inefficient serialization — while preserving structure the model needs to reason correctly.
 4. **Fidelity Validation** — see `fidelity-validation.md`. Confirm the conversion and optimization didn't drop or corrupt anything the task depends on before calling the content ready.
 
-Don't skip straight to step 3 because token savings are the visible goal — a token-optimized version of a bad conversion is still a bad conversion, just a cheaper one.
+Don't skip straight to step 3 because token savings are the visible goal — a token-optimized version of a bad conversion is still a bad conversion, just a cheaper one. And don't skip step 0 because a tool "was working fine last time" — an outdated tool can silently degrade output with no error raised.
 
 ## Output Format
 
 ```text
 Source format detected: [e.g. scanned PDF, screenshot, native PDF, scraped HTML, raw JSON dump]
 Native digital?: yes / no
+Tool(s) used: [tool name + version; confirmed current, or updated before use]
 Conversion applied: [OCR / text-layer extraction / HTML-to-text / format-specific parser / none needed]
 Confidence / fidelity notes: [low-confidence regions, ambiguous OCR, structure at risk of being lost]
 Token reduction applied: [what was stripped/deduped/reformatted, rough before/after size if available]
@@ -55,3 +57,4 @@ Ready for model input: yes / needs review -- [specific item]
 6. **Reserve compression for genuinely non-critical filler.** Repeated headers/footers, navigation chrome, and boilerplate legal text are fair game; content the task actually depends on is not — and whatever gets cut should be stated, not silently dropped.
 7. **Retrieve the relevant part rather than dumping the whole document.** When only a section of a large source matters to the task, extract or retrieve that section instead of including everything "just in case."
 8. **Report before/after, not just after.** A token-reduction claim without some sense of what was reduced and why isn't verifiable — say what was stripped, deduped, or reformatted.
+9. **Never invoke a local tool without checking it's current.** Confirm the tool is installed and up to date before converting anything with it; update if stale, and say so explicitly if it can't be updated rather than quietly using a degraded fallback.
