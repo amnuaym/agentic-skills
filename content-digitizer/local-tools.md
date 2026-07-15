@@ -21,15 +21,29 @@ Conversion accuracy depends on the tool doing the converting, not just the techn
 
 This list covers common cases, not every possible tool — when a task needs something not listed here, apply the same readiness check below to whatever tool is actually used.
 
+## Automated Setup — `setup.sh`
+
+This skill ships `setup.sh`, which actually installs and updates the core toolset above rather than leaving it as a manual checklist:
+
+```bash
+./setup.sh --check       # report installed versions only, no changes made
+./setup.sh               # install anything missing, upgrade anything outdated (core toolset)
+./setup.sh --with-heavy  # also install Whisper, LibreOffice, and a headless browser
+```
+
+It's idempotent — every step upgrades in place if a newer version exists and no-ops if the tool is already current, so it's safe to run before every conversion batch, not just once. Heavier, less commonly needed tools (audio/video transcription, legacy-document conversion via LibreOffice, headless-browser rendering for client-side HTML) are gated behind `--with-heavy` so a default run stays fast and doesn't pull in dependencies most conversions don't need.
+
+It requires a supported package manager (`apt-get`, `brew`, or `dnf`) and, for the apt/dnf paths, sudo privileges. If neither is available — a locked-down sandbox with no package manager, no root, or no network — the script says so explicitly and exits rather than silently doing nothing. In that case, fall back to the manual steps below and flag the limitation per Rule of Engagement 9 before converting anything with a tool whose freshness couldn't actually be verified.
+
 ## Tool Readiness Check (Mandatory Before Any Conversion)
 
-Run this before invoking any local tool, every time — not just the first time a tool is used in a session:
+Run this before invoking any local tool, every time — not just the first time a tool is used in a session. Steps 1-3 are exactly what `setup.sh` automates; run it first and only fall back to doing this by hand if it can't run in the current environment.
 
-1. **Confirm it's installed.** Check for the binary/library on the system (e.g., `which tesseract`, `pip show pymupdf`, `pandoc --version`) rather than assuming it's present because it was used before or because it's commonly pre-installed.
-2. **Check the installed version.** Run the tool's version command and compare it against the latest available release (package registry, project release page, or system package manager's available-update listing).
-3. **If outdated, update before converting.** Use the appropriate package manager (`pip install --upgrade <package>`, `apt update && apt upgrade <package>`, `brew upgrade <package>`, `npm update`, etc.) to bring the tool current before running the conversion — don't proceed on a stale version and hope the output is still correct.
+1. **Confirm it's installed.** Run `./setup.sh --check`, or manually check for the binary/library on the system (e.g., `which tesseract`, `pip show pymupdf`, `pandoc --version`) rather than assuming it's present because it was used before or because it's commonly pre-installed.
+2. **Check the installed version.** `setup.sh --check` reports this directly; manually, run the tool's version command and compare it against the latest available release (package registry, project release page, or system package manager's available-update listing).
+3. **If outdated, update before converting.** Run `./setup.sh` (or `./setup.sh --with-heavy` if the task needs one of the gated tools) to bring everything current in one pass; manually, use the appropriate package manager (`pip install --upgrade <package>`, `apt install --only-upgrade <package>`, `brew upgrade <package>`) — don't proceed on a stale version and hope the output is still correct.
 4. **If it can't be updated or installed, say so explicitly.** Flag the limitation rather than silently falling back to a degraded method (e.g., quietly switching from a real PDF parser to naive regex-based text scraping) without telling the user what changed and why.
-5. **Re-check periodically, not just once per session.** A tool confirmed current at the start of a long working session may have a new release mid-session — re-verify before a new batch of conversions if meaningful time has passed, rather than trusting an earlier check indefinitely.
+5. **Re-check periodically, not just once per session.** A tool confirmed current at the start of a long working session may have a new release mid-session — re-run `./setup.sh --check` before a new batch of conversions if meaningful time has passed, rather than trusting an earlier check indefinitely.
 
 ## Why Freshness Matters Per Tool Type
 
