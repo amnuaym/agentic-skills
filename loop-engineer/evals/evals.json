@@ -1,0 +1,71 @@
+{
+  "skill_name": "loop-engineer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "vague-goal-pushback",
+      "prompt": "Set up a loop that checks on our system periodically and fixes stuff that looks wrong.",
+      "expected_output": "Pushes back on the vague goal ('fixes stuff that looks wrong' isn't checkable) and asks a small batch of clarifying questions about the concrete, checkable outcome, blast radius, and what 'looks wrong' actually means, rather than immediately proposing a trigger and prompt for an undefined task.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not immediately propose a specific cadence/trigger and prompt for this vague request without first asking clarifying questions"},
+        {"text": "Asks about the concrete, checkable success/failure outcome for a single run"},
+        {"text": "Asks about blast radius (what happens if it 'fixes' something incorrectly unsupervised)"},
+        {"text": "Asks a bounded number of questions (roughly 2-4), not an exhaustive list covering every category at once"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "bundled-loop-split-recommendation",
+      "prompt": "I want a weekly loop that reviews open pull requests for our repo, checks if our production deployment is healthy, and reconciles last week's expense reports.",
+      "expected_output": "Identifies that this bundles three unrelated concerns with different owners, different cadences, and different failure modes, and recommends splitting into separate loops rather than writing one combined prompt -- explains the reasoning (different audiences/blast radius/ideal cadence) rather than just listing the three tasks in one design.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly recommends splitting this into multiple separate loops rather than producing one combined loop design"},
+        {"text": "Identifies that PR review, deployment health, and expense reconciliation are unrelated concerns (different domains/owners)"},
+        {"text": "Gives concrete reasoning for the split (e.g. different ideal cadence, different audience, or one failure masking another) rather than a bare assertion"},
+        {"text": "Does not simply produce a single weekly prompt covering all three tasks"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "cadence-volatility-mismatch",
+      "prompt": "Our monthly billing reconciliation report only updates once a month, but let's have the loop check it every 5 minutes just to be safe.",
+      "expected_output": "Pushes back on the mismatch between a 5-minute polling interval and a monthly-updating data source, explains that checking frequency should match how often the underlying data actually changes, and recommends a much longer interval or an event-driven trigger tied to when the report is actually generated instead.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly flags the mismatch between checking every 5 minutes and data that only changes monthly"},
+        {"text": "Explains that trigger cadence should match the volatility of the underlying data/state, not be chosen arbitrarily"},
+        {"text": "Recommends a longer interval or an event-driven trigger tied to report generation instead of the 5-minute default"},
+        {"text": "Does not simply agree to the 5-minute cadence as requested without pushback"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "missing-stop-conditions-and-autonomy",
+      "prompt": "Just set the loop to run forever, fully autonomous, and handle whatever comes up on its own -- no need to check in with anyone.",
+      "expected_output": "Pushes back on 'run forever fully autonomous with no check-ins' as an incomplete design, asking for or proposing explicit stop conditions (repeated failures, destructive actions, ambiguous judgment calls) and a human review cadence that starts tighter than the run cadence, framing autonomy as something earned by a track record rather than granted immediately.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not accept 'no need to check in with anyone' as a complete or acceptable design without pushback"},
+        {"text": "Proposes or asks for explicit stop conditions (e.g. repeated failures, destructive actions, ambiguous calls) that should pause the loop"},
+        {"text": "Recommends a human review cadence, especially early on, rather than zero human oversight from the start"},
+        {"text": "Frames autonomy as something that should be earned/expanded over time based on track record, not granted immediately at full trust"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "goal-prompt-quality-check",
+      "prompt": "Here's the prompt I'm planning to use for my hourly loop: 'Check the deployment and fix any issues you find.' Does this look good?",
+      "expected_output": "Identifies that the prompt is missing key components -- a clear scope boundary (what NOT to touch), explicit success/failure criteria, escalation instructions for when something is ambiguous or destructive, and what evidence to leave behind for a human reviewer -- and proposes a more complete version rather than approving the prompt as-is.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies that the prompt lacks a scope boundary (what the loop should NOT touch/fix)"},
+        {"text": "Identifies that the prompt lacks explicit, checkable success/failure criteria"},
+        {"text": "Identifies missing escalation guidance for ambiguous or destructive situations"},
+        {"text": "Identifies that the prompt doesn't specify what evidence/output the loop should leave for a human reviewer"},
+        {"text": "Does not simply approve the prompt as sufficient"}
+      ]
+    }
+  ]
+}

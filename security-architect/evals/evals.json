@@ -1,0 +1,70 @@
+{
+  "skill_name": "security-architect",
+  "evals": [
+    {
+      "id": 0,
+      "name": "control-without-threat-pushback",
+      "prompt": "Let's just encrypt every field in every database table and add MFA everywhere. That should cover our security bases for the new app.",
+      "expected_output": "Pushes back on adopting controls without a threat model behind them, asking what data classification and threat model justify blanket encryption/MFA everywhere, rather than agreeing to apply both indiscriminately -- frames this as needing Phase 0 (actors, data classification, threat model) before committing to specific controls.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not simply agree to apply encryption and MFA everywhere without question"},
+        {"text": "Asks about or references the need for data classification and/or a threat model before committing to specific controls"},
+        {"text": "Frames blanket controls with no identified threat as wasted effort or misdirected effort, not automatically 'more secure'"},
+        {"text": "Points toward starting with actors/trust boundaries/data classification (Phase 0) rather than jumping straight to control selection"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "over-broad-admin-access-pushback",
+      "prompt": "For now, let's just make everyone on the engineering team an admin in the new internal tool so nobody's blocked while we figure out the real roles later.",
+      "expected_output": "Pushes back on making everyone an admin, explaining the least-privilege default and the risk of broad standing access, and proposes a concrete alternative (e.g. a minimal starter role plus a fast-tracked request process, or time-boxed elevated access) rather than accepting blanket admin access as a temporary measure.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly pushes back on granting blanket admin access to the whole engineering team"},
+        {"text": "References least privilege as the default posture rather than accepting broad access as a reasonable stopgap"},
+        {"text": "Proposes a concrete alternative (e.g. minimal default role with a fast request path, or time-boxed/just-in-time elevation) instead of just admin-for-everyone"},
+        {"text": "Does not simply agree to the blanket admin approach and move on"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "audit-log-self-deletable-by-admins",
+      "prompt": "Our audit log is stored in the same production database as everything else, and any of our database admins can query and delete rows from it if needed for cleanup. Is that a problem?",
+      "expected_output": "Flags this as a significant gap: audit log integrity is compromised if the same admins whose actions are meant to be tracked can alter or delete the record of those actions, and recommends a tamper-evident, access-restricted mechanism (append-only store, separate service, or restricted deletion permissions) rather than accepting the current setup as acceptable 'if needed for cleanup.'",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly identifies that admins being able to delete audit log entries undermines the log's purpose (accountability/tamper-evidence)"},
+        {"text": "Does not accept 'if needed for cleanup' as sufficient justification for admins having delete access"},
+        {"text": "Recommends a concrete remediation (append-only/write-once storage, a separate dedicated audit service, or removing delete permission from admins) rather than only describing the problem abstractly"},
+        {"text": "Notes that this is a hard gap that should block Gate 3, not a minor note"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "audit-vs-operational-logging-distinction",
+      "prompt": "We're already sending detailed debug logs to our observability platform for every request. Doesn't that cover our audit logging requirement too?",
+      "expected_output": "Explains that operational/debug logging and audit logging serve different purposes and typically need different protections (tamper-evidence, access control, retention), and that verbose debug logs are unlikely to reliably capture the specific audit event taxonomy (auth events, authorization denials, admin actions, access to sensitive data) with the required fields (actor, action, target, outcome) in a findable, protected way -- recommends a distinct audit logging design rather than assuming the existing debug logs are sufficient.",
+      "files": [],
+      "assertions": [
+        {"text": "Explicitly distinguishes audit logging from operational/debug logging rather than treating them as interchangeable"},
+        {"text": "Explains that debug logs typically lack the structure, required fields, or protection (tamper-evidence, restricted access) that audit logs need"},
+        {"text": "Does not simply confirm that existing debug logging satisfies the audit logging requirement"},
+        {"text": "Recommends designing a distinct audit event taxonomy rather than relying on general-purpose debug logs"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "deprovisioning-gap-identification",
+      "prompt": "We don't have an automated process for removing system access when someone leaves the company -- IT usually gets around to it within a few weeks after HR tells them. Is that okay?",
+      "expected_output": "Flags this as a significant IAM gap (deprovisioning delay of weeks is a real security risk -- a terminated employee's credentials remain valid) and recommends defining an explicit offboarding SLA plus automating deprovisioning tied to an authoritative source (HR system) rather than accepting the current ad hoc, multi-week process as acceptable.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies the multi-week deprovisioning delay as a concrete security gap, not a minor inefficiency"},
+        {"text": "Recommends defining an explicit, much shorter deprovisioning SLA"},
+        {"text": "Recommends automating deprovisioning tied to an authoritative source (e.g. the HR system) rather than relying on manual follow-through"},
+        {"text": "Does not simply accept the current process as 'okay' given resource constraints"}
+      ]
+    }
+  ]
+}
